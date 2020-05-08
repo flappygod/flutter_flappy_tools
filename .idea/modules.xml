@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/flutterflappytools.iml" filepath="$PROJECT_DIR$/flutterflappytools.iml" />
+      <module fileurl="file://$PROJECT_DIR$/android/flutterflappytools_android.iml" filepath="$PROJECT_DIR$/android/flutterflappytools_android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/example/android/flutterflappytools_example_android.iml" filepath="$PROJECT_DIR$/example/android/flutterflappytools_example_android.iml" />
+    </modules>
+  </component>
+</project>
