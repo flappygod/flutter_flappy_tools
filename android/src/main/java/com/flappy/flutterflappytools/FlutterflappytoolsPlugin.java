@@ -51,9 +51,8 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
         final MethodChannel channel = new MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "flutterflappytools");
-        FlutterflappytoolsPlugin plugin = new FlutterflappytoolsPlugin();
-        plugin.context = flutterPluginBinding.getApplicationContext();
-        channel.setMethodCallHandler(plugin);
+        this.context = flutterPluginBinding.getApplicationContext();
+        channel.setMethodCallHandler(this);
     }
 
     @Override
@@ -65,11 +64,13 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
     @Override
     public void onAttachedToActivity(ActivityPluginBinding binding) {
         activity = binding.getActivity();
+        context = binding.getActivity().getApplicationContext();
     }
 
     @Override
     public void onReattachedToActivityForConfigChanges(ActivityPluginBinding binding) {
         activity = binding.getActivity();
+        context = binding.getActivity().getApplicationContext();
     }
 
     @Override
