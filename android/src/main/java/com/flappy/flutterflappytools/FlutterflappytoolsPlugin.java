@@ -101,26 +101,34 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
     }
 
     @Override
-    public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
+    public void onMethodCall(@NonNull final MethodCall call, @NonNull final Result result) {
         //获取路径的大小
         if (call.method.equals("getPathSize")) {
-            //最大的长度
-            String path = call.argument("path");
-            //类型
-            int type = call.argument("type");
-            //大小
-            double ret = FileSizeUtil.getFileOrFilesSize(path, type);
-            //返回
-            result.success(String.valueOf(ret));
+            new Thread() {
+                public void run() {
+                    //最大的长度
+                    String path = call.argument("path");
+                    //类型
+                    int type = call.argument("type");
+                    //大小
+                    double ret = FileSizeUtil.getFileOrFilesSize(path, type);
+                    //返回
+                    result.success(String.valueOf(ret));
+                }
+            }.start();
         }
         //清空缓存
         else if (call.method.equals("clearPath")) {
-            //获取缓存
-            final String path = call.argument("path");
-            //删除整个文件夹
-            CreateDirTool.deleteFile(new File(path));
-            //成功
-            result.success("true");
+            new Thread() {
+                public void run() {
+                    //获取缓存
+                    final String path = call.argument("path");
+                    //删除整个文件夹
+                    CreateDirTool.deleteFile(new File(path));
+                    //成功
+                    result.success("true");
+                }
+            }.start();
         }
         //获取亮度
         else if (call.method.equals("getBrightness")) {
