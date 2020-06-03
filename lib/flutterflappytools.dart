@@ -64,11 +64,31 @@ class Flutterflappytools {
     return set;
   }
 
+  //获取电量
+  static Future<double> getBatteryLevel() async {
+    final String ret = await _channel.invokeMethod('getBatteryLevel', {});
+    return double.parse(ret);
+  }
+
+  //获取当前的充电状态
+  static Future<bool> getBatteryCharge() async {
+    final String ret = await _channel.invokeMethod('getBatteryCharge', {});
+    if (ret == "1") {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   //设置屏幕是否一致常亮
-  static Future<String> setSceenOn(bool state) async {
-    final String aes = await _channel
-        .invokeMethod('setSceenOn', {"state": (state ? "1" : "0")});
-    return aes;
+  static Future<bool> setSceenSteadyLight(bool state) async {
+    final String ret = await _channel
+        .invokeMethod('setSceenSteadyLight', {"state": (state ? "1" : "0")});
+    if (ret == "1") {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   //设置为白色模式
@@ -108,56 +128,61 @@ class Flutterflappytools {
   //隐藏和显示状态栏
   static Future<bool> setStatusBarShow(bool show) async {
     final String ret = await _channel
-        .invokeMethod('setStatusBarShow', {"show": show ? "true" : "false"});
-    if (ret == "true") {
+        .invokeMethod('setStatusBarShow', {"show": show ? "1" : "0"});
+    if (ret == "1") {
       return true;
-    } else if (ret == "false") {
+    } else {
       return false;
     }
-    return false;
   }
 
   //设置颜色
-  static Future<String> setStatusBarColor(Color color) async {
+  static Future<bool> setStatusBarColor(Color color) async {
     if (Platform.isAndroid) {
-      final String aes = await _channel
+      final String ret = await _channel
           .invokeMethod('setStatusBarColor', {"color": color.value.toString()});
-      return aes;
+      if (ret == "1") {
+        return true;
+      } else {
+        return false;
+      }
     } else {
-      return "false";
+      return false;
     }
   }
 
   //设置透明
-  static Future<String> transStatusBar() async {
+  static Future<bool> transStatusBar() async {
     if (Platform.isAndroid) {
-      final String aes = await _channel.invokeMethod('transStatusBar', {});
-      return aes;
-    } else {
-      return "false";
-    }
-  }
-
-  //获取电量
-  static Future<double> getBatteryLevel() async {
-    final String ret = await _channel.invokeMethod('getBatteryLevel', {});
-    return double.parse(ret);
-  }
-
-  //获取当前的充电状态
-  static Future<bool> getBatteryChargeState() async {
-    final String ret = await _channel.invokeMethod('getBatteryChargeState', {});
-    if (ret == "true") {
-      return true;
+      final String ret = await _channel.invokeMethod('transStatusBar', {});
+      if (ret == "1") {
+        return true;
+      } else {
+        return false;
+      }
     } else {
       return false;
     }
   }
 
   //调用震动
-  static Future<String> shake() async {
-    final String flag = await _channel.invokeMethod('shake', {});
-    return flag;
+  static Future<bool> shake() async {
+    final String ret = await _channel.invokeMethod('shake', {});
+    if (ret == "1") {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  //分享字符串
+  static Future<bool> share(String share) async {
+    final String ret = await _channel.invokeMethod('share', {"share": share});
+    if (ret == "1") {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   //返回主界面

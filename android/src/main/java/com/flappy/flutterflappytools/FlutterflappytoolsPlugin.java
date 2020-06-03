@@ -104,16 +104,22 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
 
     @Override
     public void onMethodCall(@NonNull final MethodCall call, @NonNull final Result result) {
+
+        //如果没有activity存在，默认返回空的
+        if (activity == null) {
+            result.success("0");
+            return;
+        }
+
         //获取路径的大小
         if (call.method.equals("getPathSize")) {
-
+            //创建handler,使用多线程防止卡死
             final Handler handler = new Handler() {
                 public void handleMessage(Message message) {
                     //返回
                     result.success(String.valueOf(message.obj));
                 }
             };
-
             new Thread() {
                 public void run() {
                     //最大的长度
@@ -135,7 +141,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
 
             final Handler handler = new Handler() {
                 public void handleMessage(Message message) {
-                    result.success("true");
+                    result.success("1");
                 }
             };
 
@@ -167,10 +173,6 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
         }
         //设置亮度
         else if (call.method.equals("setBrightness")) {
-            if (activity == null) {
-                result.success("false");
-                return;
-            }
             //亮度
             String brightness = call.argument("brightness");
             //转换为
@@ -178,44 +180,59 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
             //修改亮度
             changeAppBrightness(activity, (int) (255 * fla));
             //成功
-            result.success("true");
+            result.success("1");
+        }
+        //获取当前的电量
+        else if (call.method.equals("getBatteryLevel")) {
+            //当前的电量数据
+            int level;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                BatteryManager batteryManager = (BatteryManager) context.getSystemService(BATTERY_SERVICE);
+                level = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+            } else {
+                Intent intent = new ContextWrapper(context.getApplicationContext()).registerReceiver(null,
+                        new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+                level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL,
+                        -1) / intent.getIntExtra(BatteryManager.EXTRA_SCALE,
+                        -1);
+            }
+            result.success(Double.toString(level * 1.0 / 100));
+        }
+        //判断当前是否正在充电
+        else if (call.method.equals("getBatteryCharge")) {
+            Intent intent = new ContextWrapper(context.getApplicationContext()).
+                    registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+            int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+            if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
+                result.success("1");
+            } else {
+                result.success("0");
+            }
         }
         //设置屏幕常亮
-        else if (call.method.equals("setSceenOn")) {
-            if (activity == null) {
-                result.success("false");
-                return;
-            }
+        else if (call.method.equals("setSceenSteadyLight")) {
             String state = call.argument("state");
             if (state.equals("1")) {
                 activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             } else {
                 activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             }
-            result.success("true");
+            result.success("1");
         }
         //设置顶部状态栏显示与隐藏
         else if (call.method.equals("setStatusBarShow")) {
-            if (activity == null) {
-                result.success("false");
-                return;
-            }
             //判断当前是否使用代理
             String show = call.argument("show");
             //显示
-            if (show.equals("true")) {
+            if (show.equals("1")) {
                 activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
             } else {
                 activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
             }
-            result.success("true");
+            result.success("1");
         }
         //调用系统分享
         else if (call.method.equals("setStatusBarColor")) {
-            if (activity == null) {
-                result.success("false");
-                return;
-            }
             //获取颜色
             String color = call.argument("color");
             //颜色
@@ -223,40 +240,14 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
             //设置颜色
             StatusBarTool.setActivityBarColor(activity, (int) intColor);
             //返回成功
-            result.success("true");
+            result.success("1");
         }
         //设置沉浸式状态栏半透明
         else if (call.method.equals("transStatusBar")) {
-            if (activity == null) {
-                result.success("false");
-                return;
-            }
             //获取颜色
             StatusBarTool.translucentActivity(activity);
-            result.success("true");
-        }
-        //获取当前的电量
-        else if (call.method.equals("getBatteryLevel")) {
-            int level = 0;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                BatteryManager batteryManager = (BatteryManager) context.getSystemService(BATTERY_SERVICE);
-                level = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
-            } else {
-                Intent intent = new ContextWrapper(context.getApplicationContext()).registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-                level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) / intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-            }
-            result.success(Double.toString(level * 1.0 / 100));
-        }
-        //判断当前是否正在充电
-        else if (call.method.equals("getBatteryChargeState")) {
-            Intent intent = new ContextWrapper(context.getApplicationContext()).
-                    registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-            int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
-            if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
-                result.success("true");
-            } else {
-                result.success("false");
-            }
+            //成功
+            result.success("1");
         }
         //震动
         else if (call.method.equals("shake")) {
@@ -267,19 +258,28 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
             //取消震动
             mVibrator.cancel();
             //成功
-            result.success("true");
+            result.success("1");
+        }
+        //调用系统分享
+        else if (call.method.equals("share")) {
+            //切记需要使用Intent.createChooser，否则会出现别样的应用选择框，您可以试试
+            String share = call.argument("share");
+            Intent shareIntent = new Intent();
+            shareIntent.setAction(Intent.ACTION_SEND);
+            shareIntent.putExtra(Intent.EXTRA_TEXT, share);
+            shareIntent.setType("text/plain");
+            shareIntent = Intent.createChooser(shareIntent, "分享");
+            activity.startActivity(shareIntent);
+            result.success("1");
         }
         //前往主页
         else if (call.method.equals("goHome")) {
-            if (context == null) {
-                result.success("false");
-                return;
-            }
-            //Home键
+            //前往主页
             goHome();
             //成功
-            result.success("true");
+            result.success("1");
         } else {
+            //没有实现
             result.notImplemented();
         }
     }
