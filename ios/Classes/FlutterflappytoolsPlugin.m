@@ -120,12 +120,43 @@
         //播放视频
         result(@"1");
     }
+    else if([@"share" isEqualToString:call.method]){
+        NSString* share=(NSString*)call.arguments[@"share"];
+        NSArray * activityItems = [[NSArray alloc] initWithObjects:share, nil];
+        UIActivityViewController * activityVC = [[UIActivityViewController alloc]initWithActivityItems:activityItems applicationActivities:nil];
+        UIActivityViewControllerCompletionWithItemsHandler myBlock = ^(UIActivityType activityType, BOOL completed, NSArray *returnedItems, NSError *activityError) {
+            NSLog(@"%@",activityType);
+            if (completed) {
+                NSLog(@"分享成功");
+            } else {
+                NSLog(@"分享失败");
+            }
+            [activityVC dismissViewControllerAnimated:YES completion:nil];
+        };
+        activityVC.completionWithItemsHandler = myBlock;
+        //拿到最顶层的controller
+        UIViewController *topController = [self _topViewController:[[UIApplication sharedApplication].keyWindow rootViewController]];
+        
+        [topController presentViewController:activityVC animated:YES completion:nil];
+        
+        result(@"true");
+    }
     else {
         result(FlutterMethodNotImplemented);
     }
 }
 
-
+//这里是获取整个应用的顶部Controller;
+- (UIViewController *)_topViewController:(UIViewController *)vc {
+    if ([vc isKindOfClass:[UINavigationController class]]) {
+        return [self _topViewController:[(UINavigationController *)vc topViewController]];
+    } else if ([vc isKindOfClass:[UITabBarController class]]) {
+        return [self _topViewController:[(UITabBarController *)vc selectedViewController]];
+    } else {
+        return vc;
+    }
+    return nil;
+}
 
 //获取大小
 -(long long)caculateSize:(NSString*) filePath{
