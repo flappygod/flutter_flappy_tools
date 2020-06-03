@@ -10,6 +10,7 @@
     [registrar addMethodCallDelegate:instance channel:channel];
 }
 
+//控制信息
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
     if([@"getPathSize" isEqualToString:call.method]){
         //获取路径
@@ -47,7 +48,7 @@
         //清空
         [fileManager removeItemAtPath:path error:nil];
         //返回成功
-        result(@"true");
+        result(@"1");
     }
     //获取亮度
     else  if([@"getBrightness" isEqualToString:call.method]){
@@ -60,10 +61,24 @@
         NSString* brightness=(NSString*)call.arguments[@"brightness"];
         CGFloat fla=brightness.doubleValue;
         [[UIScreen mainScreen] setBrightness:fla];
-        result(@"true");
+        result(@"1");
+    }
+    //获取当前电池的电量
+    else if([@"getBatteryLevel" isEqualToString:call.method]){
+        [UIDevice currentDevice].batteryMonitoringEnabled = YES;
+        double deviceLevel = [UIDevice currentDevice].batteryLevel;
+        result([NSString stringWithFormat:@"%f",deviceLevel]);
+    }
+    //获取当前的充电状态
+    else if([@"getBatteryChargeState" isEqualToString:call.method]){
+        if([UIDevice currentDevice].batteryState==UIDeviceBatteryStateCharging){
+            result(@"1");
+        }else{
+            result(@"0");
+        }
     }
     //设置常亮
-    else if([@"setSceenOn" isEqualToString:call.method]){
+    else if([@"setSceenSteadyLight" isEqualToString:call.method]){
         NSString* state=(NSString*)call.arguments[@"state"];
         //设置屏幕常亮
         if([state isEqualToString:@"1"]){
@@ -71,9 +86,8 @@
         }else{
             [[UIApplication sharedApplication] setIdleTimerDisabled:NO];
         }
-        result(@"true");
+        result(@"1");
     }
-    
     //获取当前的充电状态
     else if([@"changeStatusBar" isEqualToString:call.method]){
         NSString* type=(NSString*)call.arguments[@"type"];
@@ -92,33 +106,19 @@
         //返回
         NSString* flag=(NSString*)call.arguments[@"show"];
         //代理成功
-        if([flag isEqualToString:@"true"]){
+        if([flag isEqualToString:@"1"]){
             [[UIApplication sharedApplication] setStatusBarHidden:false withAnimation:UIStatusBarAnimationFade];
         }else{
             [[UIApplication sharedApplication] setStatusBarHidden:true withAnimation:UIStatusBarAnimationFade];
         }
-        result(@"true");
-    }
-    //获取当前电池的电量
-    else if([@"getBatteryLevel" isEqualToString:call.method]){
-        [UIDevice currentDevice].batteryMonitoringEnabled = YES;
-        double deviceLevel = [UIDevice currentDevice].batteryLevel;
-        result([NSString stringWithFormat:@"%f",deviceLevel]);
-    }
-    //获取当前的充电状态
-    else if([@"getBatteryChargeState" isEqualToString:call.method]){
-        if([UIDevice currentDevice].batteryState==UIDeviceBatteryStateCharging){
-            result(@"true");
-        }else{
-            result(@"false");
-        }
+        result(@"1");
     }
     //整栋
     else  if([@"shake" isEqualToString:call.method]){
         //调用系统震动
         AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
         //播放视频
-        result(@"true");
+        result(@"1");
     }
     else {
         result(FlutterMethodNotImplemented);
