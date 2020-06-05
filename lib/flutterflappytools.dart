@@ -136,7 +136,7 @@ class Flutterflappytools {
     }
   }
 
-  //设置颜色
+  //设置颜色1234567890
   static Future<bool> setStatusBarColor(Color color) async {
     if (Platform.isAndroid) {
       final String ret = await _channel
@@ -151,7 +151,7 @@ class Flutterflappytools {
     }
   }
 
-  //设置透明
+  //设置透明1234567890
   static Future<bool> transStatusBar() async {
     if (Platform.isAndroid) {
       final String ret = await _channel.invokeMethod('transStatusBar', {});
