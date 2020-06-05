@@ -70,7 +70,7 @@
         result([NSString stringWithFormat:@"%f",deviceLevel]);
     }
     //获取当前的充电状态
-    else if([@"getBatteryChargeState" isEqualToString:call.method]){
+    else if([@"getBatteryCharge" isEqualToString:call.method]){
         if([UIDevice currentDevice].batteryState==UIDeviceBatteryStateCharging){
             result(@"1");
         }else{
