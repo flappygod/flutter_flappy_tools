@@ -192,4 +192,15 @@ class Flutterflappytools {
       return true;
     }
   }
+
+  //设置webview的cookie
+  static Future<bool> addManagerCookie(String url, String cookie) async {
+    final String ret = await _channel
+        .invokeMethod('addManagerCookie', {"url": url, "cookie": cookie});
+    if (ret == "1") {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }

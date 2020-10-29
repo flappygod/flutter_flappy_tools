@@ -120,6 +120,24 @@
         //播放视频
         result(@"1");
     }
+    //设置cookie
+    else  if([@"addManagerCookie" isEqualToString:call.method]){
+        NSString* cookie=(NSString*)call.arguments[@"cookie"];
+        NSString* url=(NSString*)call.arguments[@"url"];
+        NSArray *aArray = [cookie componentsSeparatedByString:@"="];
+        NSDictionary* properties = [[NSMutableDictionary alloc] init];
+        [properties setValue:aArray[1] forKey:NSHTTPCookieValue];
+        [properties setValue:aArray[0] forKey:NSHTTPCookieName];
+        [properties setValue:[[NSURL URLWithString:url] host] forKey:NSHTTPCookieDomain];
+        [properties setValue:[[NSURL URLWithString:@"/"] path] forKey:NSHTTPCookiePath];
+        //设置
+        NSHTTPCookie* cook = [[NSHTTPCookie alloc] initWithProperties:properties];
+        //设置
+        [[NSHTTPCookieStorage sharedHTTPCookieStorage] setCookie:cook];
+        
+        //播放视频
+        result(@"1");
+    }
     else if([@"share" isEqualToString:call.method]){
         NSString* share=(NSString*)call.arguments[@"share"];
         NSArray * activityItems = [[NSArray alloc] initWithObjects:share, nil];

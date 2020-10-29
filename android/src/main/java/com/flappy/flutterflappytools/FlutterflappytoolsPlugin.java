@@ -17,6 +17,8 @@ import android.provider.MediaStore;
 import android.provider.Settings;
 import android.view.Window;
 import android.view.WindowManager;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
@@ -272,6 +274,17 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
             activity.startActivity(shareIntent);
             result.success("1");
         }
+        //添加manager的cookie
+        else if(call.method.equals("addManagerCookie")){
+            //网页地址
+            String url = call.argument("url");
+            //cookie
+            String cookie = call.argument("cookie");
+            //添加cookie
+            addCookie(url,cookie);
+            //返回成功
+            result.success("1");
+        }
         //前往主页
         else if (call.method.equals("goHome")) {
             //前往主页
@@ -310,6 +323,27 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
             return value;
         } catch (Settings.SettingNotFoundException e) {
             return 0;
+        }
+    }
+
+    /**
+     * 同步cookie
+     *
+     * @param url 地址
+     * @param cookie 需要添加的Cookie值,以键值对的方式:key=value
+     */
+    private void addCookie (String url, String cookie) {
+        CookieSyncManager.createInstance(context);
+        CookieManager cookieManager = CookieManager.getInstance();
+        cookieManager.setAcceptCookie(true);
+        cookieManager.setCookie(url, cookie);
+        cookieManager.setCookie(url, "Domain="+url);
+        cookieManager.setCookie(url, "Path=/");
+        String cookies = cookieManager.getCookie(url);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            cookieManager.flush();
+        } else {
+            CookieSyncManager.getInstance().sync();
         }
     }
 
