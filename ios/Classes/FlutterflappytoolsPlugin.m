@@ -129,13 +129,14 @@
         [properties setValue:aArray[1] forKey:NSHTTPCookieValue];
         [properties setValue:aArray[0] forKey:NSHTTPCookieName];
         [properties setValue:[[NSURL URLWithString:url] host] forKey:NSHTTPCookieDomain];
-        [properties setValue:[[NSURL URLWithString:@"/"] path] forKey:NSHTTPCookiePath];
+        [properties setValue:@"/" forKey:NSHTTPCookiePath];
+        //设置
+        [properties setValue:[NSDate dateWithTimeIntervalSinceNow:60*60*24*100] forKey:NSHTTPCookieExpires];
         //设置
         NSHTTPCookie* cook = [[NSHTTPCookie alloc] initWithProperties:properties];
         //设置
         [[NSHTTPCookieStorage sharedHTTPCookieStorage] setCookie:cook];
-        
-        //播放视频
+        //返回成功
         result(@"1");
     }
     else if([@"share" isEqualToString:call.method]){
