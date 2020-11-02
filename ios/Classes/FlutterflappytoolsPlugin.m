@@ -123,15 +123,24 @@
     //设置cookie
     else  if([@"addManagerCookie" isEqualToString:call.method]){
         NSString* cookie=(NSString*)call.arguments[@"cookie"];
+        //URL
         NSString* url=(NSString*)call.arguments[@"url"];
+        //array
         NSArray *aArray = [cookie componentsSeparatedByString:@"="];
+        //alloc
         NSDictionary* properties = [[NSMutableDictionary alloc] init];
+        //值
         [properties setValue:aArray[1] forKey:NSHTTPCookieValue];
+        //名称
         [properties setValue:aArray[0] forKey:NSHTTPCookieName];
+        //设置host
         [properties setValue:[[NSURL URLWithString:url] host] forKey:NSHTTPCookieDomain];
+        //地址
         [properties setValue:@"/" forKey:NSHTTPCookiePath];
-        //设置
-        [properties setValue:[NSDate dateWithTimeIntervalSinceNow:60*60*24*100] forKey:NSHTTPCookieExpires];
+        //设置cookie版本, 默认写0
+        [properties setObject:@"0" forKey:NSHTTPCookieVersion];
+        //设置一年
+        [properties setValue:[NSDate dateWithTimeIntervalSinceNow:3600*24*30*12] forKey:NSHTTPCookieExpires];
         //设置
         NSHTTPCookie* cook = [[NSHTTPCookie alloc] initWithProperties:properties];
         //设置
