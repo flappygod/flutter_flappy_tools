@@ -138,7 +138,7 @@
         //地址
         [properties setValue:@"/" forKey:NSHTTPCookiePath];
         //设置cookie版本, 默认写0
-        [properties setObject:@"0" forKey:NSHTTPCookieVersion];
+        [properties setValue:@"0" forKey:NSHTTPCookieVersion];
         //设置一年
         [properties setValue:[NSDate dateWithTimeIntervalSinceNow:3600*24*30*12] forKey:NSHTTPCookieExpires];
         //设置
