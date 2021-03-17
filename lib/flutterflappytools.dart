@@ -20,8 +20,7 @@ enum StatusBarType {
 //工具
 class Flutterflappytools {
   //工具
-  static const MethodChannel _channel =
-      const MethodChannel('flutterflappytools');
+  static const MethodChannel _channel = const MethodChannel('flutterflappytools');
 
   //获取文件夹的大小
   static Future<String?> getPathSize(String path, PathSizeType type) async {
@@ -39,35 +38,32 @@ class Flutterflappytools {
       typeInt = 4;
     }
     //返回视频的地址
-    final String? size = await _channel
-        .invokeMethod('getPathSize', {"path": path, "type": typeInt});
+    final String? size = await _channel.invokeMethod('getPathSize', {"path": path, "type": typeInt});
     return size;
   }
 
   //清空目录
   static Future<String?> clearPath(String path) async {
-    final String? flag =
-        await _channel.invokeMethod('clearPath', {"path": path});
+    final String? flag = await _channel.invokeMethod('clearPath', {"path": path});
     return flag;
   }
 
   //获取当前的屏幕亮度
   static Future<double> getBrightness() async {
-    final String brightness = await (_channel.invokeMethod('getBrightness', {}) as FutureOr<String>);
-    return double.parse(brightness);
+    final String? brightness = await _channel.invokeMethod('getBrightness', {});
+    return double.parse(brightness ?? "0");
   }
 
   //设置屏幕亮度
   static Future<String?> setBrightness(double brightness) async {
-    final String? set = await _channel.invokeMethod(
-        'setBrightness', {"brightness": brightness.toStringAsFixed(2)});
+    final String? set = await _channel.invokeMethod('setBrightness', {"brightness": brightness.toStringAsFixed(2)});
     return set;
   }
 
   //获取电量
   static Future<double> getBatteryLevel() async {
-    final String ret = await (_channel.invokeMethod('getBatteryLevel', {}) as FutureOr<String>);
-    return double.parse(ret);
+    final String? ret = await _channel.invokeMethod('getBatteryLevel', {});
+    return double.parse(ret ?? "0");
   }
 
   //获取当前的充电状态
@@ -82,8 +78,7 @@ class Flutterflappytools {
 
   //设置屏幕是否一致常亮
   static Future<bool> setSceenSteadyLight(bool state) async {
-    final String? ret = await _channel
-        .invokeMethod('setSceenSteadyLight', {"state": (state ? "1" : "0")});
+    final String? ret = await _channel.invokeMethod('setSceenSteadyLight', {"state": (state ? "1" : "0")});
     if (ret == "1") {
       return true;
     } else {
@@ -96,28 +91,24 @@ class Flutterflappytools {
     if (Platform.isAndroid) {
       //白色
       if (type == StatusBarType.WHITE) {
-        SystemUiOverlayStyle systemUiOverlayStyle = SystemUiOverlayStyle.light
-            .copyWith(statusBarColor: Colors.transparent);
+        SystemUiOverlayStyle systemUiOverlayStyle = SystemUiOverlayStyle.light.copyWith(statusBarColor: Colors.transparent);
         SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
       }
       //黑色
       else if (type == StatusBarType.BLACK) {
-        SystemUiOverlayStyle systemUiOverlayStyle = SystemUiOverlayStyle.dark
-            .copyWith(statusBarColor: Colors.transparent);
+        SystemUiOverlayStyle systemUiOverlayStyle = SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent);
         SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
       }
     } else if (Platform.isIOS) {
       //白色
       if (type == StatusBarType.WHITE) {
-        SystemUiOverlayStyle systemUiOverlayStyle = SystemUiOverlayStyle.light
-            .copyWith(statusBarColor: Colors.transparent);
+        SystemUiOverlayStyle systemUiOverlayStyle = SystemUiOverlayStyle.light.copyWith(statusBarColor: Colors.transparent);
         SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
         await _channel.invokeMethod('changeStatusBar', {"type": "1"});
       }
       //黑色
       else if (type == StatusBarType.BLACK) {
-        SystemUiOverlayStyle systemUiOverlayStyle = SystemUiOverlayStyle.dark
-            .copyWith(statusBarColor: Colors.transparent);
+        SystemUiOverlayStyle systemUiOverlayStyle = SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent);
         SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
         await _channel.invokeMethod('changeStatusBar', {"type": "2"});
       }
@@ -127,8 +118,7 @@ class Flutterflappytools {
 
   //隐藏和显示状态栏
   static Future<bool> setStatusBarShow(bool show) async {
-    final String? ret = await _channel
-        .invokeMethod('setStatusBarShow', {"show": show ? "1" : "0"});
+    final String? ret = await _channel.invokeMethod('setStatusBarShow', {"show": show ? "1" : "0"});
     if (ret == "1") {
       return true;
     } else {
@@ -139,8 +129,7 @@ class Flutterflappytools {
   //设置颜色1234567890
   static Future<bool> setStatusBarColor(Color color) async {
     if (Platform.isAndroid) {
-      final String? ret = await _channel
-          .invokeMethod('setStatusBarColor', {"color": color.value.toString()});
+      final String? ret = await _channel.invokeMethod('setStatusBarColor', {"color": color.value.toString()});
       if (ret == "1") {
         return true;
       } else {
@@ -195,8 +184,7 @@ class Flutterflappytools {
 
   //设置webview的cookie
   static Future<bool> addManagerCookie(String url, String cookie) async {
-    final String? ret = await _channel
-        .invokeMethod('addManagerCookie', {"url": url, "cookie": cookie});
+    final String? ret = await _channel.invokeMethod('addManagerCookie', {"url": url, "cookie": cookie});
     if (ret == "1") {
       return true;
     } else {
