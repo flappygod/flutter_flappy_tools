@@ -24,7 +24,7 @@ class Flutterflappytools {
       const MethodChannel('flutterflappytools');
 
   //获取文件夹的大小
-  static Future<String> getPathSize(String path, PathSizeType type) async {
+  static Future<String?> getPathSize(String path, PathSizeType type) async {
     int typeInt = 1;
     if (type == PathSizeType.TYPE_B) {
       typeInt = 1;
@@ -39,40 +39,40 @@ class Flutterflappytools {
       typeInt = 4;
     }
     //返回视频的地址
-    final String size = await _channel
+    final String? size = await _channel
         .invokeMethod('getPathSize', {"path": path, "type": typeInt});
     return size;
   }
 
   //清空目录
-  static Future<String> clearPath(String path) async {
-    final String flag =
+  static Future<String?> clearPath(String path) async {
+    final String? flag =
         await _channel.invokeMethod('clearPath', {"path": path});
     return flag;
   }
 
   //获取当前的屏幕亮度
   static Future<double> getBrightness() async {
-    final String brightness = await _channel.invokeMethod('getBrightness', {});
+    final String brightness = await (_channel.invokeMethod('getBrightness', {}) as FutureOr<String>);
     return double.parse(brightness);
   }
 
   //设置屏幕亮度
-  static Future<String> setBrightness(double brightness) async {
-    final String set = await _channel.invokeMethod(
+  static Future<String?> setBrightness(double brightness) async {
+    final String? set = await _channel.invokeMethod(
         'setBrightness', {"brightness": brightness.toStringAsFixed(2)});
     return set;
   }
 
   //获取电量
   static Future<double> getBatteryLevel() async {
-    final String ret = await _channel.invokeMethod('getBatteryLevel', {});
+    final String ret = await (_channel.invokeMethod('getBatteryLevel', {}) as FutureOr<String>);
     return double.parse(ret);
   }
 
   //获取当前的充电状态
   static Future<bool> getBatteryCharge() async {
-    final String ret = await _channel.invokeMethod('getBatteryCharge', {});
+    final String? ret = await _channel.invokeMethod('getBatteryCharge', {});
     if (ret == "1") {
       return true;
     } else {
@@ -82,7 +82,7 @@ class Flutterflappytools {
 
   //设置屏幕是否一致常亮
   static Future<bool> setSceenSteadyLight(bool state) async {
-    final String ret = await _channel
+    final String? ret = await _channel
         .invokeMethod('setSceenSteadyLight', {"state": (state ? "1" : "0")});
     if (ret == "1") {
       return true;
@@ -127,7 +127,7 @@ class Flutterflappytools {
 
   //隐藏和显示状态栏
   static Future<bool> setStatusBarShow(bool show) async {
-    final String ret = await _channel
+    final String? ret = await _channel
         .invokeMethod('setStatusBarShow', {"show": show ? "1" : "0"});
     if (ret == "1") {
       return true;
@@ -139,7 +139,7 @@ class Flutterflappytools {
   //设置颜色1234567890
   static Future<bool> setStatusBarColor(Color color) async {
     if (Platform.isAndroid) {
-      final String ret = await _channel
+      final String? ret = await _channel
           .invokeMethod('setStatusBarColor', {"color": color.value.toString()});
       if (ret == "1") {
         return true;
@@ -154,7 +154,7 @@ class Flutterflappytools {
   //设置透明1234567890
   static Future<bool> transStatusBar() async {
     if (Platform.isAndroid) {
-      final String ret = await _channel.invokeMethod('transStatusBar', {});
+      final String? ret = await _channel.invokeMethod('transStatusBar', {});
       if (ret == "1") {
         return true;
       } else {
@@ -167,7 +167,7 @@ class Flutterflappytools {
 
   //调用震动
   static Future<bool> shake() async {
-    final String ret = await _channel.invokeMethod('shake', {});
+    final String? ret = await _channel.invokeMethod('shake', {});
     if (ret == "1") {
       return true;
     } else {
@@ -177,7 +177,7 @@ class Flutterflappytools {
 
   //分享字符串
   static Future<bool> share(String share) async {
-    final String ret = await _channel.invokeMethod('share', {"share": share});
+    final String? ret = await _channel.invokeMethod('share', {"share": share});
     if (ret == "1") {
       return true;
     } else {
@@ -195,7 +195,7 @@ class Flutterflappytools {
 
   //设置webview的cookie
   static Future<bool> addManagerCookie(String url, String cookie) async {
-    final String ret = await _channel
+    final String? ret = await _channel
         .invokeMethod('addManagerCookie', {"url": url, "cookie": cookie});
     if (ret == "1") {
       return true;
