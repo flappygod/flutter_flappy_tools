@@ -49,42 +49,59 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
     //当前activity
     private Activity activity;
 
+    //binding
+    private ActivityPluginBinding activityPluginBinding;
+
+
+    private MethodChannel channel;
+
     //退出时的时间
     private long mExitTime;
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
-        final MethodChannel channel = new MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "flutterflappytools");
-        this.context = flutterPluginBinding.getApplicationContext();
+        channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "flutterflappytools");
         channel.setMethodCallHandler(this);
+        this.context = flutterPluginBinding.getApplicationContext();
     }
 
     @Override
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
+        channel.setMethodCallHandler(null);
         context = null;
         activity = null;
     }
 
     @Override
-    public void onAttachedToActivity(ActivityPluginBinding binding) {
-        activity = binding.getActivity();
-        context = binding.getActivity().getApplicationContext();
+    public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
+        addBinding(binding);
     }
 
     @Override
-    public void onReattachedToActivityForConfigChanges(ActivityPluginBinding binding) {
-        activity = binding.getActivity();
-        context = binding.getActivity().getApplicationContext();
+    public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
+        addBinding(binding);
     }
 
     @Override
     public void onDetachedFromActivityForConfigChanges() {
-        activity = null;
+
     }
 
     @Override
     public void onDetachedFromActivity() {
+        removeBinding();
+    }
+
+    //绑定关系
+    private void addBinding(ActivityPluginBinding binding) {
+        activity = binding.getActivity();
+        activityPluginBinding = binding;
+    }
+
+    //移除关系
+    private void removeBinding() {
         activity = null;
+        activityPluginBinding = null;
     }
 
     // This static function is optional and equivalent to onAttachedToEngine. It supports the old
@@ -101,6 +118,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
         FlutterflappytoolsPlugin plugin = new FlutterflappytoolsPlugin();
         plugin.context = registrar.activity();
         plugin.activity = registrar.activity();
+        plugin.channel = channel;
         channel.setMethodCallHandler(plugin);
     }
 
@@ -275,13 +293,13 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
             result.success("1");
         }
         //添加manager的cookie
-        else if(call.method.equals("addManagerCookie")){
+        else if (call.method.equals("addManagerCookie")) {
             //网页地址
             String url = call.argument("url");
             //cookie
             String cookie = call.argument("cookie");
             //添加cookie
-            addCookie(url,cookie);
+            addCookie(url, cookie);
             //返回成功
             result.success("1");
         }
@@ -329,15 +347,15 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
     /**
      * 同步cookie
      *
-     * @param url 地址
+     * @param url    地址
      * @param cookie 需要添加的Cookie值,以键值对的方式:key=value
      */
-    private void addCookie (String url, String cookie) {
+    private void addCookie(String url, String cookie) {
         CookieSyncManager.createInstance(context);
         CookieManager cookieManager = CookieManager.getInstance();
         cookieManager.setAcceptCookie(true);
         cookieManager.setCookie(url, cookie);
-        cookieManager.setCookie(url, "Domain="+url);
+        cookieManager.setCookie(url, "Domain=" + url);
         cookieManager.setCookie(url, "Path=/");
         String cookies = cookieManager.getCookie(url);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
