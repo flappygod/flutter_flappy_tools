@@ -403,6 +403,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
             Intent intent = new Intent();
             intent.setPackage("com.baidu.BaiduMap");
             intent.setData(uri);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -429,6 +430,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
                     .append("&style=").append("2");
             Intent intent = new Intent("android.intent.action.VIEW", android.net.Uri.parse(stringBuffer.toString()));
             intent.setPackage("com.autonavi.minimap");
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -452,6 +454,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
                     + "&referer={地图定位}");
             Intent intent = new Intent();
             intent.setData(uri);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         } catch (Exception e) {
             System.out.println(e.getMessage());
