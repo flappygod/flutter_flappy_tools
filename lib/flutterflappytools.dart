@@ -191,4 +191,54 @@ class Flutterflappytools {
       return false;
     }
   }
+
+  //判断是否能够
+  static Future<bool> isMapInstalled(MapType type) async {
+    final String? ret = await _channel.invokeMethod('isMapInstalled', {"type": _getMapType(type)});
+    if (ret == "1") {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  //跳转到相应的地图
+  static Future<bool> jumpToMap(MapType type, String lat, String lng, String title) async {
+    final String? ret = await _channel.invokeMethod('jumpToMap', {"type": _getMapType(type), "lat": lat, "lng": lng, "title": title});
+    if (ret == "1") {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  static String _getMapType(MapType type) {
+    int mapType = 0;
+    switch (type) {
+      case MapType.MapApple:
+        mapType = 0;
+        break;
+      case MapType.MapAmap:
+        mapType = 1;
+        break;
+      case MapType.MapBaidu:
+        mapType = 2;
+        break;
+      case MapType.MapTencent:
+        mapType = 3;
+        break;
+    }
+    return mapType.toString();
+  }
+}
+
+enum MapType {
+  //苹果
+  MapApple,
+  //高德
+  MapAmap,
+  //百度
+  MapBaidu,
+  //腾讯
+  MapTencent,
 }

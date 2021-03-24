@@ -1,5 +1,8 @@
 #import "FlutterflappytoolsPlugin.h"
 #import "AudioToolbox/AudioToolbox.h"
+#import <MapKit/MapKit.h>
+#import <MAMapKit/MAMapKit.h>
+#import <AMapSearchKit/AMapSearchKit.h>
 
 @implementation FlutterflappytoolsPlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
@@ -168,6 +171,107 @@
         [topController presentViewController:activityVC animated:YES completion:nil];
         
         result(@"true");
+    }
+    //判断地图是否安装
+    else if([@"isMapInstalled" isEqualToString:call.method]){
+        //跳转地图类型
+        NSInteger type=((NSString*)call.arguments[@"type"]).intValue;
+        //苹果自带
+        if(type==0){
+            result(@"1");
+        }
+        //高德地图
+        else if(type==1){
+            if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"iosamap://"]]) {
+                result(@"1");
+            }else{
+                result(@"0");
+            }
+        }
+        //百度地址
+        else if(type==2){
+            if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"baidumap://"]]) {
+                result(@"1");
+            }else{
+                result(@"0");
+            }
+        }
+        //腾讯地图
+        else if(type==3){
+            if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"qqmap://"]]) {
+                result(@"1");
+            }else{
+                result(@"0");
+            }
+        }else{
+            result(@"0");
+        }
+    }
+    //跳转到对应地图
+    else if([@"jumpToMap" isEqualToString:call.method]){
+        //跳转地图类型
+        NSInteger type=((NSString*)call.arguments[@"type"]).intValue;
+        NSString* lat=(NSString*)call.arguments[@"lat"];
+        NSString* lng=(NSString*)call.arguments[@"lng"];
+        NSString* title=(NSString*)call.arguments[@"title"];
+        //苹果地图
+        if(type==0){
+            CLLocationCoordinate2D loc = CLLocationCoordinate2DMake([lng floatValue],
+                                                                    [lng floatValue]);
+            MKMapItem *currentLocation = [MKMapItem mapItemForCurrentLocation];
+            MKMapItem *toLocation = [[MKMapItem alloc] initWithPlacemark:[[MKPlacemark alloc] initWithCoordinate:loc addressDictionary:nil]];
+            [MKMapItem openMapsWithItems:@[currentLocation, toLocation]
+                           launchOptions:@{MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving,
+                                           MKLaunchOptionsShowsTrafficKey: [NSNumber numberWithBool:YES]}];
+            result(@"1");
+        }
+        //高德地图
+        else if(type==1){
+            // 判断手机是否安装高德地图
+            if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"iosamap://"]]) {
+                
+                NSString *urlString = [[NSString stringWithFormat:@"iosamap://navi?sourceApplication=%@&backScheme=%@&lat=%f&lon=%f&dev=0&style=2",
+                                        title,
+                                        @"",
+                                        [lat floatValue],
+                                        [lng floatValue]] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+                [[UIApplication sharedApplication] openURL:[NSURL URLWithString:urlString]];
+                result(@"1");
+            }else{
+                result(@"0");
+            }
+        }
+        //百度地图
+        else if(type==2){
+            // 判断手机是否安装QQ
+            if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"baidumap://"]]) {
+                
+                NSString *urlString = [[NSString stringWithFormat:@"baidumap://map/direction?origin={{我的位置}}&destination=latlng:%f,%f|name=%@&mode=driving&coord_type=gcj02",
+                                        [lat floatValue],
+                                        [lng floatValue],
+                                        title] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+                [[UIApplication sharedApplication] openURL:[NSURL URLWithString:urlString]];
+                
+                result(@"1");
+            }else{
+                result(@"0");
+            }
+        }
+        //腾讯地图
+        else if(type==3){
+            // 腾讯地图
+            if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"qqmap://"]]) {
+                NSString *urlString = [[NSString stringWithFormat:@"qqmap://map/routeplan?type=drive&fromcoord=CurrentLocation&tocoord=%@,%@&referer=IXHBZ-QIZE4-ZQ6UP-DJYEO-HC2K2-EZBXJ",
+                                        lat,
+                                        lng] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+                [[UIApplication sharedApplication] openURL:[NSURL URLWithString:urlString]];
+                result(@"1");
+            }else{
+                result(@"0");
+            }
+        }else{
+            result(@"0");
+        }
     }
     else {
         result(FlutterMethodNotImplemented);

@@ -7,6 +7,8 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Build;
@@ -15,6 +17,7 @@ import android.os.Message;
 import android.os.Vibrator;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.CookieManager;
@@ -26,6 +29,8 @@ import androidx.annotation.NonNull;
 
 import java.io.File;
 import java.text.DecimalFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
@@ -43,6 +48,7 @@ import static android.content.Context.BATTERY_SERVICE;
  */
 public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandler, ActivityAware {
 
+
     //上下文
     private Context context;
 
@@ -52,8 +58,9 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
     //binding
     private ActivityPluginBinding activityPluginBinding;
 
-
+    //channel
     private MethodChannel channel;
+
 
     //退出时的时间
     private long mExitTime;
@@ -309,9 +316,160 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
             goHome();
             //成功
             result.success("1");
+        }
+        //是否安装地图
+        else if (call.method.equals("isMapInstalled")) {
+            int type = Integer.parseInt((String) call.argument("type"));
+            if (type == 0) {
+                result.success("0");
+            } else if (type == 1) {
+                if (checkApkExist(context, "com.autonavi.minimap")) {
+                    result.success("1");
+                } else {
+                    result.success("0");
+                }
+            } else if (type == 2) {
+                if (checkApkExist(context, "com.baidu.BaiduMap")) {
+                    result.success("1");
+                } else {
+                    result.success("0");
+                }
+            } else if (type == 3) {
+                if (checkApkExist(context, "com.tencent.map")) {
+                    result.success("1");
+                } else {
+                    result.success("0");
+                }
+            } else {
+                result.success("0");
+            }
+        }
+        //是否安装地图
+        else if (call.method.equals("jumpToMap")) {
+            String lat = call.argument("lat");
+            String lng = call.argument("lng");
+            String title = call.argument("title");
+            int type = Integer.parseInt((String) call.argument("type"));
+            if (type == 0) {
+                result.success("0");
+            } else if (type == 1) {
+                if (checkApkExist(context, "com.autonavi.minimap")) {
+                    invokeAuToNaveMap(context, lat, lng, title);
+                    result.success("1");
+                } else {
+                    result.success("0");
+                }
+            } else if (type == 2) {
+                if (checkApkExist(context, "com.baidu.BaiduMap")) {
+                    invokeBaiDuMap(context, lat, lng, title);
+                    result.success("1");
+                } else {
+                    result.success("0");
+                }
+            } else if (type == 3) {
+                if (checkApkExist(context, "com.tencent.map")) {
+                    invokeQQMap(context, lat, lng, title);
+                    result.success("1");
+                } else {
+                    result.success("0");
+                }
+            } else {
+                result.success("0");
+            }
         } else {
             //没有实现
             result.notImplemented();
+        }
+    }
+
+
+    /**
+     * 百度地图
+     *
+     * @param context
+     * @param lat
+     * @param lng
+     * @param title
+     */
+    private static void invokeBaiDuMap(Context context, String lat, String lng, String title) {
+
+        try {
+            Uri uri = Uri.parse("baidumap://map/geocoder?" +
+                    "location=" + lat + "," + lng +
+                    //终点的显示名称
+                    "&name=" + title +
+                    "&coord_type=gcj02");
+            //坐标 （百度同样支持他自己的db0911的坐标，但是高德和腾讯不支持）
+            Intent intent = new Intent();
+            intent.setPackage("com.baidu.BaiduMap");
+            intent.setData(uri);
+            context.startActivity(intent);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+    }
+
+    /**
+     * 高德地图
+     *
+     * @param context
+     * @param lat
+     * @param lng
+     * @param title
+     */
+    private static void invokeAuToNaveMap(Context context, String lat, String lng, String title) {
+        try {
+            StringBuffer stringBuffer = new StringBuffer("androidamap://navi?sourceApplication=")
+                    .append("地图定位");
+            stringBuffer.append("&poiname=").append(title);
+            stringBuffer.append("&lat=").append(lat)
+                    .append("&lon=").append(lng)
+                    .append("&dev=").append("0")
+                    .append("&style=").append("2");
+            Intent intent = new Intent("android.intent.action.VIEW", android.net.Uri.parse(stringBuffer.toString()));
+            intent.setPackage("com.autonavi.minimap");
+            context.startActivity(intent);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+    }
+
+    /**
+     * 调用腾讯地图
+     *
+     * @param context
+     * @param lat
+     * @param lng
+     * @param title
+     */
+    private static void invokeQQMap(Context context, String lat, String lng, String title) {
+        try {
+            Uri uri = Uri.parse("qqmap://map/routeplan?type=drive" +
+                    "&to=" + title
+                    + "&tocoord=" + lat + "," + lng
+                    + "&referer={你的应用名称}");
+            Intent intent = new Intent();
+            intent.setData(uri);
+            context.startActivity(intent);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+
+    //判断
+    private boolean checkApkExist(Context context, String packageName) {
+        try {
+            ApplicationInfo info = context.getPackageManager().getApplicationInfo(packageName, PackageManager.GET_UNINSTALLED_PACKAGES);
+            if (info != null) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
         }
     }
 
