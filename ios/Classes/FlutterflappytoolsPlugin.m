@@ -1,7 +1,6 @@
 #import "FlutterflappytoolsPlugin.h"
 #import "AudioToolbox/AudioToolbox.h"
 #import <MapKit/MapKit.h>
-#import <AMapSearchKit/AMapSearchKit.h>
 
 @implementation FlutterflappytoolsPlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
