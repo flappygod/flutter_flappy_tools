@@ -449,7 +449,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
             Uri uri = Uri.parse("qqmap://map/routeplan?type=drive" +
                     "&to=" + title
                     + "&tocoord=" + lat + "," + lng
-                    + "&referer={你的应用名称}");
+                    + "&referer={地图定位}");
             Intent intent = new Intent();
             intent.setData(uri);
             context.startActivity(intent);
