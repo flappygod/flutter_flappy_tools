@@ -214,7 +214,7 @@
         NSString* title=(NSString*)call.arguments[@"title"];
         //苹果地图
         if(type==0){
-            CLLocationCoordinate2D loc = CLLocationCoordinate2DMake([lng floatValue],
+            CLLocationCoordinate2D loc = CLLocationCoordinate2DMake([lat floatValue],
                                                                     [lng floatValue]);
             MKMapItem *currentLocation = [MKMapItem mapItemForCurrentLocation];
             MKMapItem *toLocation = [[MKMapItem alloc] initWithPlacemark:[[MKPlacemark alloc] initWithCoordinate:loc addressDictionary:nil]];
@@ -228,7 +228,8 @@
             // 判断手机是否安装高德地图
             if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"iosamap://"]]) {
                 
-                NSString *urlString = [[NSString stringWithFormat:@"iosamap://navi?sourceApplication=%@&backScheme=%@&lat=%f&lon=%f&dev=0&style=2",
+                NSString *urlString = [[NSString stringWithFormat:@"iosamap://navi?sourceApplication=%@&poiname=%@&backScheme=%@&lat=%f&lon=%f&dev=0&style=2",
+                                        @"地图导航",
                                         title,
                                         @"",
                                         [lat floatValue],
@@ -241,12 +242,13 @@
         }
         //百度地图
         else if(type==2){
-            // 判断手机是否安装QQ
+            // 判断手机是否安装百度地图
             if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"baidumap://"]]) {
                 
-                NSString *urlString = [[NSString stringWithFormat:@"baidumap://map/direction?origin={{我的位置}}&destination=latlng:%f,%f|name=%@&mode=driving&coord_type=gcj02",
+                NSString *urlString = [[NSString stringWithFormat:@"baidumap://map/direction?origin={{我的位置}}&destination=latlng:%f,%f|name:%@|addr:%@&mode=driving&coord_type=gcj02",
                                         [lat floatValue],
                                         [lng floatValue],
+                                        title,
                                         title] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
                 [[UIApplication sharedApplication] openURL:[NSURL URLWithString:urlString]];
                 
