@@ -245,10 +245,9 @@
             // 判断手机是否安装百度地图
             if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"baidumap://"]]) {
                 
-                NSString *urlString = [[NSString stringWithFormat:@"baidumap://map/direction?origin={{我的位置}}&destination=latlng:%f,%f|name:%@&mode=driving&coord_type=gcj02",
+                NSString *urlString = [[NSString stringWithFormat:@"baidumap://map/direction?origin={{我的位置}}&destination=latlng:%f,%f|name=%@&mode=driving&coord_type=gcj02",
                                         [lat floatValue],
                                         [lng floatValue],
-                                        title,
                                         title] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
                 [[UIApplication sharedApplication] openURL:[NSURL URLWithString:urlString]];
                 
