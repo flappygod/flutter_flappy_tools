@@ -174,12 +174,24 @@ class Flutterflappytools {
     }
   }
 
+
+  //分享字符串
+  static Future<bool> jumpToUrl(String url) async {
+    final String? ret = await _channel.invokeMethod('jumpToUrl', {"url": url});
+    if (ret == "1") {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   //返回主界面
-  static Future goHome() async {
+  static Future<bool> goHome() async {
     if (Platform.isAndroid) {
       await _channel.invokeMethod('goHome', {});
       return true;
     }
+    return true;
   }
 
   //设置webview的cookie

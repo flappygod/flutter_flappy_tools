@@ -170,6 +170,11 @@
         
         result(@"true");
     }
+    else if([@"jumpToUrl" isEqualToString:call.method]){
+        NSString* url=(NSString*)call.arguments[@"url"];
+        [self openScheme:url];
+        result(@"true");
+    }
     //判断地图是否安装
     else if([@"isMapInstalled" isEqualToString:call.method]){
         //跳转地图类型
@@ -272,6 +277,21 @@
     else {
         result(FlutterMethodNotImplemented);
     }
+}
+
+//打开浏览器
+- (void)openScheme:(NSString *)scheme {
+  UIApplication *application = [UIApplication sharedApplication];
+  NSURL *URL = [NSURL URLWithString:scheme];
+  if ([application respondsToSelector:@selector(openURL:options:completionHandler:)]) {
+    [application openURL:URL options:@{}
+       completionHandler:^(BOOL success) {
+       NSLog(@"Open %@: %d",scheme,success);
+    }];
+  } else {
+    BOOL success = [application openURL:URL];
+    NSLog(@"Open %@: %d",scheme,success);
+  }
 }
 
 //这里是获取整个应用的顶部Controller;
