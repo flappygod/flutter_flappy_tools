@@ -309,6 +309,14 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
             activity.startActivity(intent);
             result.success("1");
         }
+        //打开浏览器
+        else if (call.method.equals("jumpToScheme")) {
+            String url = call.argument("url");
+            Uri uri = Uri.parse(url);
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            activity.startActivity(intent);
+            result.success("1");
+        }
         //添加manager的cookie
         else if (call.method.equals("addManagerCookie")) {
             //网页地址

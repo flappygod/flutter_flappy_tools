@@ -175,6 +175,11 @@
         [self openScheme:url];
         result(@"true");
     }
+    else if([@"jumpToScheme" isEqualToString:call.method]){
+        NSString* url=(NSString*)call.arguments[@"url"];
+        [self openScheme:url];
+        result(@"true");
+    }
     //判断地图是否安装
     else if([@"isMapInstalled" isEqualToString:call.method]){
         //跳转地图类型

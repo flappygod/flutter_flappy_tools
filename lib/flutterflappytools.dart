@@ -174,10 +174,19 @@ class Flutterflappytools {
     }
   }
 
-
   //分享字符串
   static Future<bool> jumpToUrl(String url) async {
     final String? ret = await _channel.invokeMethod('jumpToUrl', {"url": url});
+    if (ret == "1") {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  //jumpto scheme
+  static Future<bool> jumpToScheme(String url) async {
+    final String? ret = await _channel.invokeMethod('jumpToScheme', {"url": url});
     if (ret == "1") {
       return true;
     } else {
