@@ -195,9 +195,9 @@ class Flutterflappytools {
   }
 
   //返回主界面
-  static Future<bool> goHome() async {
+  static Future<bool> goHome({String? toast}) async {
     if (Platform.isAndroid) {
-      await _channel.invokeMethod('goHome', {});
+      await _channel.invokeMethod('goHome', {"toast": toast});
       return true;
     }
     return true;
