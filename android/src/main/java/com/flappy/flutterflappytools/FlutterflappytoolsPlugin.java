@@ -331,9 +331,9 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
         //前往主页
         else if (call.method.equals("goHome")) {
             //网页地址
-            String url = call.argument("url");
+            String toast = call.argument("toast");
             //前往主页
-            goHome();
+            goHome(toast);
             //成功
             result.success("1");
         }
@@ -549,9 +549,11 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
     /*******************
      * 返回主界面
      */
-    private void goHome() {
+    private void goHome(String toast) {
         if ((System.currentTimeMillis() - mExitTime) > 2000) {
-            //Toast.makeText(context, "再按一次退出应用", Toast.LENGTH_SHORT).show();
+            if (toast != null && !toast.equals("")) {
+                Toast.makeText(context, toast, Toast.LENGTH_SHORT).show();
+            }
             mExitTime = System.currentTimeMillis();
         } else {
             Intent mHomeIntent = new Intent(Intent.ACTION_MAIN);
