@@ -8,6 +8,7 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.BatteryManager;
@@ -15,22 +16,19 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
-import android.provider.MediaStore;
 import android.provider.Settings;
-import android.text.TextUtils;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
-import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
 import java.io.File;
 import java.text.DecimalFormat;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.List;
+import java.util.Locale;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
@@ -305,7 +303,9 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
             String url = call.argument("url");
             Uri uri = Uri.parse(url);
             Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-            intent.setClassName("com.android.browser", "com.android.browser.BrowserActivity");
+            if (isInstalledApp(context, "com.android.browser")) {
+                intent.setClassName("com.android.browser", "com.android.browser.BrowserActivity");
+            }
             activity.startActivity(intent);
             result.success("1");
         }
@@ -400,6 +400,21 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
             //没有实现
             result.notImplemented();
         }
+    }
+
+    //check install
+    public static boolean isInstalledApp(Context context, String packageName) {
+        final PackageManager packageManager = context.getPackageManager();
+        List<PackageInfo> pinfo = packageManager.getInstalledPackages(0);
+        if (pinfo != null) {
+            for (int i = 0; i < pinfo.size(); i++) {
+                String pn = pinfo.get(i).packageName.toLowerCase(Locale.ENGLISH);
+                if (pn.equals(packageName)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 
