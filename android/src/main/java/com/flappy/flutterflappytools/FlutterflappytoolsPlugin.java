@@ -304,7 +304,10 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
             Uri uri = Uri.parse(url);
             Intent intent = new Intent(Intent.ACTION_VIEW, uri);
             if (isInstalledApp(context, "com.android.browser")) {
+                System.out.println("installed com.android.browser");
                 intent.setClassName("com.android.browser", "com.android.browser.BrowserActivity");
+            }else{
+                System.out.println("not installed com.android.browser");
             }
             activity.startActivity(intent);
             result.success("1");
