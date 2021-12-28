@@ -306,7 +306,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
             if (isInstalledApp(context, "com.android.browser")) {
                 System.out.println("installed com.android.browser");
                 intent.setClassName("com.android.browser", "com.android.browser.BrowserActivity");
-            }else{
+            } else {
                 System.out.println("not installed com.android.browser");
             }
             activity.startActivity(intent);
@@ -407,17 +407,26 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
 
     //check install
     public static boolean isInstalledApp(Context context, String packageName) {
-        final PackageManager packageManager = context.getPackageManager();
-        List<PackageInfo> pinfo = packageManager.getInstalledPackages(0);
-        if (pinfo != null) {
-            for (int i = 0; i < pinfo.size(); i++) {
-                String pn = pinfo.get(i).packageName.toLowerCase(Locale.ENGLISH);
-                if (pn.equals(packageName)) {
-                    return true;
+        try {
+            ApplicationInfo info = context.getPackageManager().getApplicationInfo(packageName, PackageManager.GET_UNINSTALLED_PACKAGES);
+            if (info != null) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            final PackageManager packageManager = context.getPackageManager();
+            List<PackageInfo> pinfo = packageManager.getInstalledPackages(0);
+            if (pinfo != null) {
+                for (int i = 0; i < pinfo.size(); i++) {
+                    String pn = pinfo.get(i).packageName.toLowerCase(Locale.ENGLISH);
+                    if (pn.equals(packageName)) {
+                        return true;
+                    }
                 }
             }
+            return false;
         }
-        return false;
     }
 
 
