@@ -301,15 +301,24 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
         else if (call.method.equals("jumpToUrl")) {
             //切记需要使用Intent.createChooser，否则会出现别样的应用选择框，您可以试试
             String url = call.argument("url");
-            Uri uri = Uri.parse(url);
-            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-            if (isInstalledApp(context, "com.android.browser")) {
-                System.out.println("installed com.android.browser");
-                intent.setClassName("com.android.browser", "com.android.browser.BrowserActivity");
-            } else {
-                System.out.println("not installed com.android.browser");
+            //start activity
+            try {
+                Uri uri = Uri.parse(url);
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                if (isInstalledApp(context, "com.android.browser")) {
+                    System.out.println("installed com.android.browser");
+                    intent.setClassName("com.android.browser", "com.android.browser.BrowserActivity");
+                } else {
+                    System.out.println("not installed com.android.browser");
+                }
+                activity.startActivity(intent);
             }
-            activity.startActivity(intent);
+            //has error
+            catch (Exception ex) {
+                Uri uri = Uri.parse(url);
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                activity.startActivity(intent);
+            }
             result.success("1");
         }
         //打开浏览器
