@@ -47,10 +47,10 @@ import static android.content.Context.BATTERY_SERVICE;
 public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandler, ActivityAware {
 
 
-    //上下文
+    //context
     private Context context;
 
-    //当前activity
+    //activity
     private Activity activity;
 
     //binding
@@ -59,8 +59,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
     //channel
     private MethodChannel channel;
 
-
-    //退出时的时间
+    //exit time
     private long mExitTime;
 
     @Override
@@ -97,13 +96,11 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
         removeBinding();
     }
 
-    //绑定关系
     private void addBinding(ActivityPluginBinding binding) {
         activity = binding.getActivity();
         activityPluginBinding = binding;
     }
 
-    //移除关系
     private void removeBinding() {
         activity = null;
         activityPluginBinding = null;
@@ -130,86 +127,73 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
     @Override
     public void onMethodCall(@NonNull final MethodCall call, @NonNull final Result result) {
 
-        //如果没有activity存在，默认返回空的
+        //return 0
         if (activity == null) {
             result.success("0");
             return;
         }
 
-        //获取路径的大小
+        //get path size
         if (call.method.equals("getPathSize")) {
-            //创建handler,使用多线程防止卡死
             final Handler handler = new Handler() {
                 public void handleMessage(Message message) {
-                    //返回
                     result.success(String.valueOf(message.obj));
                 }
             };
             new Thread() {
                 public void run() {
-                    //最大的长度
                     String path = call.argument("path");
-                    //类型
                     int type = call.argument("type");
-                    //大小
                     double ret = FileSizeUtil.getFileOrFilesSize(path, type);
-                    //消息
                     Message msg = handler.obtainMessage(1, ret);
-                    //发送
                     handler.sendMessage(msg);
 
                 }
             }.start();
         }
-        //清空缓存
+        //clear path
         else if (call.method.equals("clearPath")) {
-
             final Handler handler = new Handler() {
                 public void handleMessage(Message message) {
                     result.success("1");
                 }
             };
-
             new Thread() {
                 public void run() {
-                    //获取缓存
                     final String path = call.argument("path");
-                    //删除整个文件夹
                     CreateDirTool.deleteFile(new File(path));
-                    //消息
                     Message msg = handler.obtainMessage(1);
-                    //发送
                     handler.sendMessage(msg);
                 }
             }.start();
         }
-        //获取亮度
+        //get Brightness
         else if (call.method.equals("getBrightness")) {
-            //获取当前的屏幕亮度
+            //get Brightness
             int bright = getScreenBrightness(activity);
-            //转换
+            //change
             double brightLess = bright * 1.0 / 255;
-            //保留两位小数
+            //format
             DecimalFormat df = new DecimalFormat("#.00");
-            //保留两位小数
+            //format
             String str = df.format(brightLess);
-            //除开
+            //success
             result.success(str);
         }
-        //设置亮度
+        //set Brightness
         else if (call.method.equals("setBrightness")) {
-            //亮度
+            //brightness
             String brightness = call.argument("brightness");
-            //转换为
+            //parse double
             double fla = Double.parseDouble(brightness);
-            //修改亮度
+            //change bright ness
             changeAppBrightness(activity, (int) (255 * fla));
-            //成功
+            //success
             result.success("1");
         }
-        //获取当前的电量
+        //getBatteryLevel
         else if (call.method.equals("getBatteryLevel")) {
-            //当前的电量数据
+            //level
             int level;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 BatteryManager batteryManager = (BatteryManager) context.getSystemService(BATTERY_SERVICE);
@@ -223,7 +207,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
             }
             result.success(Double.toString(level * 1.0 / 100));
         }
-        //判断当前是否正在充电
+        //is Charging or not
         else if (call.method.equals("getBatteryCharge")) {
             Intent intent = new ContextWrapper(context.getApplicationContext()).
                     registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
@@ -234,7 +218,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
                 result.success("0");
             }
         }
-        //设置屏幕常亮
+        //setScreenSteadyLight
         else if (call.method.equals("setSceenSteadyLight")) {
             String state = call.argument("state");
             if (state.equals("1")) {
@@ -244,74 +228,35 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
             }
             result.success("1");
         }
-        //设置顶部状态栏显示与隐藏
-        else if (call.method.equals("setStatusBarShow")) {
-            //判断当前是否使用代理
-            String show = call.argument("show");
-            //显示
-            if (show.equals("1")) {
-                activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            } else {
-                activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            }
-            result.success("1");
-        }
-        //调用系统分享
-        else if (call.method.equals("setStatusBarColor")) {
-            //获取颜色
-            String color = call.argument("color");
-            //颜色
-            long intColor = Long.parseLong(color);
-            //设置颜色
-            StatusBarTool.setActivityBarColor(activity, (int) intColor);
-            //返回成功
-            result.success("1");
-        }
-        //设置沉浸式状态栏半透明
-        else if (call.method.equals("transStatusBar")) {
-            //获取颜色
-            StatusBarTool.translucentActivity(activity);
-            //成功
-            result.success("1");
-        }
-        //震动
+        //shake
         else if (call.method.equals("shake")) {
-            //激励震动
             Vibrator mVibrator = (Vibrator) context.getSystemService(Service.VIBRATOR_SERVICE);
-            //震动时间
             mVibrator.vibrate(1000);
-            //取消震动
             mVibrator.cancel();
-            //成功
             result.success("1");
         }
-        //调用系统分享
+        //share
         else if (call.method.equals("share")) {
-            //切记需要使用Intent.createChooser，否则会出现别样的应用选择框，您可以试试
             String share = call.argument("share");
             Intent shareIntent = new Intent();
             shareIntent.setAction(Intent.ACTION_SEND);
             shareIntent.putExtra(Intent.EXTRA_TEXT, share);
             shareIntent.setType("text/plain");
-            shareIntent = Intent.createChooser(shareIntent, "分享");
+            shareIntent = Intent.createChooser(shareIntent, "Share");
             activity.startActivity(shareIntent);
             result.success("1");
         }
-        //打开浏览器
+        //jump to url
         else if (call.method.equals("jumpToUrl")) {
-            //切记需要使用Intent.createChooser，否则会出现别样的应用选择框，您可以试试
             String url = call.argument("url");
             //start activity
             try {
-                Uri uri = Uri.parse(url);
-                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                 if (isInstalledApp(context, "com.android.browser")) {
-                    System.out.println("installed com.android.browser");
+                    Uri uri = Uri.parse(url);
+                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                     intent.setClassName("com.android.browser", "com.android.browser.BrowserActivity");
-                } else {
-                    System.out.println("not installed com.android.browser");
+                    activity.startActivity(intent);
                 }
-                activity.startActivity(intent);
             }
             //has error
             catch (Exception ex) {
@@ -321,7 +266,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
             }
             result.success("1");
         }
-        //打开浏览器
+        //jump to scheme
         else if (call.method.equals("jumpToScheme")) {
             String url = call.argument("url");
             Uri uri = Uri.parse(url);
@@ -329,27 +274,21 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
             activity.startActivity(intent);
             result.success("1");
         }
-        //添加manager的cookie
+        //add cookie
         else if (call.method.equals("addManagerCookie")) {
-            //网页地址
             String url = call.argument("url");
-            //cookie
             String cookie = call.argument("cookie");
-            //添加cookie
             addCookie(url, cookie);
-            //返回成功
             result.success("1");
         }
-        //前往主页
+        //got home
         else if (call.method.equals("goHome")) {
-            //网页地址
+            //toast
             String toast = call.argument("toast");
-            //前往主页
             goHome(toast);
-            //成功
             result.success("1");
         }
-        //是否安装地图
+        //check map install
         else if (call.method.equals("isMapInstalled")) {
             int type = Integer.parseInt((String) call.argument("type"));
             if (type == 0) {
@@ -376,7 +315,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
                 result.success("0");
             }
         }
-        //是否安装地图
+        //jump to map
         else if (call.method.equals("jumpToMap")) {
             String lat = call.argument("lat");
             String lng = call.argument("lng");
@@ -409,7 +348,6 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
                 result.success("0");
             }
         } else {
-            //没有实现
             result.notImplemented();
         }
     }
@@ -439,23 +377,14 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
     }
 
 
-    /**
-     * 百度地图
-     *
-     * @param context
-     * @param lat
-     * @param lng
-     * @param title
-     */
+    //baidumap
     private static void invokeBaiDuMap(Context context, String lat, String lng, String title) {
 
         try {
             Uri uri = Uri.parse("baidumap://map/geocoder?" +
                     "location=" + lat + "," + lng +
-                    //终点的显示名称
                     "&name=" + title +
                     "&coord_type=gcj02");
-            //坐标 （百度同样支持他自己的db0911的坐标，但是高德和腾讯不支持）
             Intent intent = new Intent();
             intent.setPackage("com.baidu.BaiduMap");
             intent.setData(uri);
@@ -467,18 +396,11 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
 
     }
 
-    /**
-     * 高德地图
-     *
-     * @param context
-     * @param lat
-     * @param lng
-     * @param title
-     */
+    //amap
     private static void invokeAuToNaveMap(Context context, String lat, String lng, String title) {
         try {
             StringBuffer stringBuffer = new StringBuffer("androidamap://navi?sourceApplication=")
-                    .append("地图定位");
+                    .append("Location");
             stringBuffer.append("&poiname=").append(title);
             stringBuffer.append("&lat=").append(lat)
                     .append("&lon=").append(lng)
@@ -494,20 +416,13 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
 
     }
 
-    /**
-     * 调用腾讯地图
-     *
-     * @param context
-     * @param lat
-     * @param lng
-     * @param title
-     */
+    //tencent map
     private static void invokeQQMap(Context context, String lat, String lng, String title) {
         try {
             Uri uri = Uri.parse("qqmap://map/routeplan?type=drive" +
                     "&to=" + title
                     + "&tocoord=" + lat + "," + lng
-                    + "&referer={地图定位}");
+                    + "&referer={Location}");
             Intent intent = new Intent();
             intent.setData(uri);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -518,7 +433,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
     }
 
 
-    //判断
+    //check exist
     private boolean checkApkExist(Context context, String packageName) {
         try {
             ApplicationInfo info = context.getPackageManager().getApplicationInfo(packageName, PackageManager.GET_UNINSTALLED_PACKAGES);
@@ -532,7 +447,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
         }
     }
 
-    //修改屏幕亮度
+    //change brightness
     public void changeAppBrightness(Activity activity, int brightness) {
         if (activity == null) {
             return;
@@ -547,7 +462,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
         window.setAttributes(lp);
     }
 
-    //获取屏幕的亮度
+    //get screen brightness
     public static int getScreenBrightness(Activity activity) {
         if (activity == null) {
             return 0;
@@ -561,12 +476,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
         }
     }
 
-    /**
-     * 同步cookie
-     *
-     * @param url    地址
-     * @param cookie 需要添加的Cookie值,以键值对的方式:key=value
-     */
+    //add cookie
     private void addCookie(String url, String cookie) {
         CookieSyncManager.createInstance(context);
         CookieManager cookieManager = CookieManager.getInstance();
@@ -582,9 +492,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
         }
     }
 
-    /*******************
-     * 返回主界面
-     */
+    //go home
     private void goHome(String toast) {
         if ((System.currentTimeMillis() - mExitTime) > 2000) {
             if (toast != null && !toast.equals("")) {

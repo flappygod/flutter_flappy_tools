@@ -61,7 +61,6 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _todo(){
-    Flutterflappytools.setStatusBarShow(false);
   }
 
 }
