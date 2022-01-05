@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'dart:async';
 import 'dart:io';
 
-//类型
+//path size type
 enum PathSizeType {
   TYPE_B,
   TYPE_KB,
@@ -11,18 +11,18 @@ enum PathSizeType {
   TYPE_GB,
 }
 
-//顶部
+//starus bar
 enum StatusBarType {
   WHITE,
   BLACK,
 }
 
-//工具
+//tools
 class Flutterflappytools {
-  //工具
+  //channel
   static const MethodChannel _channel = const MethodChannel('flutterflappytools');
 
-  //获取文件夹的大小
+  //path size
   static Future<String?> getPathSize(String path, PathSizeType type) async {
     int typeInt = 1;
     if (type == PathSizeType.TYPE_B) {
@@ -37,36 +37,36 @@ class Flutterflappytools {
     if (type == PathSizeType.TYPE_GB) {
       typeInt = 4;
     }
-    //返回视频的地址
+    //video path
     final String? size = await _channel.invokeMethod('getPathSize', {"path": path, "type": typeInt});
     return size;
   }
 
-  //清空目录
+  //clear path
   static Future<String?> clearPath(String path) async {
     final String? flag = await _channel.invokeMethod('clearPath', {"path": path});
     return flag;
   }
 
-  //获取当前的屏幕亮度
+  //brightness
   static Future<double> getBrightness() async {
     final String? brightness = await _channel.invokeMethod('getBrightness', {});
     return double.parse(brightness ?? "0");
   }
 
-  //设置屏幕亮度
+  //brightness
   static Future<String?> setBrightness(double brightness) async {
     final String? set = await _channel.invokeMethod('setBrightness', {"brightness": brightness.toStringAsFixed(2)});
     return set;
   }
 
-  //获取电量
+  //battery level
   static Future<double> getBatteryLevel() async {
     final String? ret = await _channel.invokeMethod('getBatteryLevel', {});
     return double.parse(ret ?? "0");
   }
 
-  //获取当前的充电状态
+  //charge
   static Future<bool> getBatteryCharge() async {
     final String? ret = await _channel.invokeMethod('getBatteryCharge', {});
     if (ret == "1") {
@@ -76,7 +76,7 @@ class Flutterflappytools {
     }
   }
 
-  //设置屏幕是否一致常亮
+  //stay light
   static Future<bool> setSceenSteadyLight(bool state) async {
     final String? ret = await _channel.invokeMethod('setSceenSteadyLight', {"state": (state ? "1" : "0")});
     if (ret == "1") {
@@ -86,27 +86,27 @@ class Flutterflappytools {
     }
   }
 
-  //设置为白色模式
+  //change statusbar color
   static Future<bool> changeStatusBar(StatusBarType type) async {
     if (Platform.isAndroid) {
-      //白色
+      //white
       if (type == StatusBarType.WHITE) {
         SystemUiOverlayStyle systemUiOverlayStyle = SystemUiOverlayStyle.light.copyWith(statusBarColor: Colors.transparent);
         SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
       }
-      //黑色
+      //black
       else if (type == StatusBarType.BLACK) {
         SystemUiOverlayStyle systemUiOverlayStyle = SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent);
         SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
       }
     } else if (Platform.isIOS) {
-      //白色
+      //white
       if (type == StatusBarType.WHITE) {
         SystemUiOverlayStyle systemUiOverlayStyle = SystemUiOverlayStyle.light.copyWith(statusBarColor: Colors.transparent);
         SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
         await _channel.invokeMethod('changeStatusBar', {"type": "1"});
       }
-      //黑色
+      //black
       else if (type == StatusBarType.BLACK) {
         SystemUiOverlayStyle systemUiOverlayStyle = SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent);
         SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
@@ -116,7 +116,7 @@ class Flutterflappytools {
     return true;
   }
 
-  //隐藏和显示状态栏
+  //set status bar show
   static Future<bool> setStatusBarShow(bool show) async {
     final String? ret = await _channel.invokeMethod('setStatusBarShow', {"show": show ? "1" : "0"});
     if (ret == "1") {
@@ -126,7 +126,7 @@ class Flutterflappytools {
     }
   }
 
-  //设置颜色1234567890
+  //set color 1234567890
   static Future<bool> setStatusBarColor(Color color) async {
     if (Platform.isAndroid) {
       final String? ret = await _channel.invokeMethod('setStatusBarColor', {"color": color.value.toString()});
@@ -140,7 +140,7 @@ class Flutterflappytools {
     }
   }
 
-  //设置透明1234567890
+  //set translute 1234567890
   static Future<bool> transStatusBar() async {
     if (Platform.isAndroid) {
       final String? ret = await _channel.invokeMethod('transStatusBar', {});
@@ -154,7 +154,7 @@ class Flutterflappytools {
     }
   }
 
-  //调用震动
+  //shake
   static Future<bool> shake() async {
     final String? ret = await _channel.invokeMethod('shake', {});
     if (ret == "1") {
@@ -164,7 +164,7 @@ class Flutterflappytools {
     }
   }
 
-  //分享字符串
+  //share
   static Future<bool> share(String share) async {
     final String? ret = await _channel.invokeMethod('share', {"share": share});
     if (ret == "1") {
@@ -174,7 +174,7 @@ class Flutterflappytools {
     }
   }
 
-  //分享字符串
+  //jump to url
   static Future<bool> jumpToUrl(String url) async {
     final String? ret = await _channel.invokeMethod('jumpToUrl', {"url": url});
     if (ret == "1") {
@@ -194,7 +194,7 @@ class Flutterflappytools {
     }
   }
 
-  //返回主界面
+  //go home
   static Future<bool> goHome({String? toast}) async {
     if (Platform.isAndroid) {
       await _channel.invokeMethod('goHome', {"toast": toast});
@@ -203,7 +203,7 @@ class Flutterflappytools {
     return true;
   }
 
-  //设置webview的cookie
+  //set cookie
   static Future<bool> addManagerCookie(String url, String cookie) async {
     final String? ret = await _channel.invokeMethod('addManagerCookie', {"url": url, "cookie": cookie});
     if (ret == "1") {
@@ -213,7 +213,7 @@ class Flutterflappytools {
     }
   }
 
-  //判断是否能够
+  //is map installed
   static Future<bool> isMapInstalled(MapType type) async {
     final String? ret = await _channel.invokeMethod('isMapInstalled', {"type": _getMapType(type)});
     if (ret == "1") {
@@ -223,7 +223,7 @@ class Flutterflappytools {
     }
   }
 
-  //跳转到相应的地图
+  //jump to map
   static Future<bool> jumpToMap(MapType type, String lat, String lng, String title) async {
     final String? ret = await _channel.invokeMethod('jumpToMap', {"type": _getMapType(type), "lat": lat, "lng": lng, "title": title});
     if (ret == "1") {
@@ -254,12 +254,12 @@ class Flutterflappytools {
 }
 
 enum MapType {
-  //苹果
+  //apple
   MapApple,
-  //高德
+  //amap
   MapAmap,
-  //百度
+  //baidu
   MapBaidu,
-  //腾讯
+  //tencent
   MapTencent,
 }
