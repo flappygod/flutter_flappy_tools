@@ -8,14 +8,12 @@ import java.io.File;
 public class CreateDirTool {
 
     public static void createDir(String DIRPATH) throws Exception {
-
         File file = new File(DIRPATH);
         synchronized (CreateDirTool.class) {
             if (!file.exists()) {
                 if (!file.mkdirs()) {
-                    Exception e = new Exception(
-                            "createDir failed, no dir or dirpath wrong");
-                    throw e;
+                    Exception exception = new Exception("createDir failed, no dir or dirpath wrong");
+                    throw exception;
                 }
             }
         }
@@ -26,7 +24,7 @@ public class CreateDirTool {
     }
 
     public static boolean deleteFile(File file) {
-        boolean b = true;
+        boolean flag = true;
         if (file.isDirectory()) {
             File[] childFiles = file.listFiles();
             if (childFiles == null || childFiles.length == 0) {
@@ -35,24 +33,23 @@ public class CreateDirTool {
             for (int i = 0; i < childFiles.length; i++) {
                 boolean men = deleteFile(childFiles[i]);
                 if (!men) {
-                    b = false;
+                    flag = false;
                 }
             }
         } else {
             if (!file.delete()) {
-                b = false;
+                flag = false;
             }
-            file = null;
         }
-        return b;
+        return flag;
     }
 
 
     public static boolean isExitsSdcard() {
-        if (android.os.Environment.getExternalStorageState().equals(
-                android.os.Environment.MEDIA_MOUNTED))
+        if (android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED)) {
             return true;
-        else return !TextUtils.isEmpty(android.os.Environment
-                .getExternalStorageDirectory().getAbsolutePath());
+        } else {
+            return !TextUtils.isEmpty(android.os.Environment.getExternalStorageDirectory().getAbsolutePath());
+        }
     }
 }
