@@ -256,6 +256,10 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
                     Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                     intent.setClassName("com.android.browser", "com.android.browser.BrowserActivity");
                     activity.startActivity(intent);
+                }else{
+                    Uri uri = Uri.parse(url);
+                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                    activity.startActivity(intent);
                 }
             }
             //has error
