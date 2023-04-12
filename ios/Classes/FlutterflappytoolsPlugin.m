@@ -236,19 +236,22 @@
     }
 }
 
+
+
 //goto scheme
 - (void)openScheme:(NSString *)scheme {
-  UIApplication *application = [UIApplication sharedApplication];
-  NSURL *URL = [NSURL URLWithString:scheme];
-  if ([application respondsToSelector:@selector(openURL:options:completionHandler:)]) {
-    [application openURL:URL options:@{}
-       completionHandler:^(BOOL success) {
-       NSLog(@"Open %@: %d",scheme,success);
-    }];
-  } else {
-    BOOL success = [application openURL:URL];
-    NSLog(@"Open %@: %d",scheme,success);
-  }
+    NSString* encodedString =  [scheme stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
+    UIApplication *application = [UIApplication sharedApplication];
+    NSURL *URL = [NSURL URLWithString:encodedString];
+    if ([application respondsToSelector:@selector(openURL:options:completionHandler:)]) {
+        [application openURL:URL options:@{}
+           completionHandler:^(BOOL success) {
+            NSLog(@"Open %@: %d",scheme,success);
+        }];
+    } else {
+        BOOL success = [application openURL:URL];
+        NSLog(@"Open %@: %d",scheme,success);
+    }
 }
 
 //get top controller
