@@ -69,7 +69,7 @@
         }
     }
     //setSceenSteadyLight
-    else if([@"setSceenSteadyLight" isEqualToString:call.method]){
+    else if([@"setScreenSteadyLight" isEqualToString:call.method]){
         NSString* state=(NSString*)call.arguments[@"state"];
         if([state isEqualToString:@"1"]){
             [[UIApplication sharedApplication] setIdleTimerDisabled:YES];

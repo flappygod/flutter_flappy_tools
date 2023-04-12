@@ -26,6 +26,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 
 import java.io.File;
+import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Locale;
@@ -219,7 +220,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
             }
         }
         //setScreenSteadyLight
-        else if (call.method.equals("setSceenSteadyLight")) {
+        else if (call.method.equals("setScreenSteadyLight")) {
             String state = call.argument("state");
             if (state.equals("1")) {
                 activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -249,6 +250,12 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
         //jump to url
         else if (call.method.equals("jumpToUrl")) {
             String url = call.argument("url");
+            try {
+                url = URLEncoder.encode(url, "utf-8");
+            } catch (Exception ex) {
+                result.success("0");
+                return;
+            }
             //start activity
             try {
                 if (isInstalledApp(context, "com.android.browser")) {
@@ -256,7 +263,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
                     Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                     intent.setClassName("com.android.browser", "com.android.browser.BrowserActivity");
                     activity.startActivity(intent);
-                }else{
+                } else {
                     Uri uri = Uri.parse(url);
                     Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                     activity.startActivity(intent);

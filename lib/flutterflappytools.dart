@@ -76,8 +76,8 @@ class Flutterflappytools {
   }
 
   //stay light
-  static Future<bool> setSceenSteadyLight(bool state) async {
-    final String? ret = await _channel.invokeMethod('setSceenSteadyLight', {"state": (state ? "1" : "0")});
+  static Future<bool> setScreenSteadyLight(bool state) async {
+    final String? ret = await _channel.invokeMethod('setScreenSteadyLight', {"state": (state ? "1" : "0")});
     if (ret == "1") {
       return true;
     } else {
