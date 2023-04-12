@@ -250,12 +250,6 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
         //jump to url
         else if (call.method.equals("jumpToUrl")) {
             String url = call.argument("url");
-            try {
-                url = URLEncoder.encode(url, "utf-8");
-            } catch (Exception ex) {
-                result.success("0");
-                return;
-            }
             //start activity
             try {
                 if (isInstalledApp(context, "com.android.browser")) {
