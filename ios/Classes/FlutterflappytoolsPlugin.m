@@ -3,7 +3,7 @@
 #import <MapKit/MapKit.h>
 
 
-@interface FlutterflappytoolsPlugin ()<FlutterStreamHandler,FlutterPlugin>
+@interface FlutterflappytoolsPlugin ()<FlutterStreamHandler>
 @property(nonatomic,weak) FlutterEventChannel* eventChannel;
 @property(nonatomic,strong) FlutterEventSink eventSink;
 @end
@@ -19,41 +19,6 @@
     [registrar addMethodCallDelegate:instance channel:channel];
     
     
-    //create eventChannel
-    FlutterEventChannel* eventChannel=[FlutterEventChannel eventChannelWithName:@"flutterflappytools_event"
-                                                                binaryMessenger:[registrar messenger]];
-    instance.eventChannel = eventChannel;
-    [instance.eventChannel setStreamHandler:instance];
-    
-    //add application delegate for life circle
-    [registrar addApplicationDelegate:instance];
-    
-    
-}
-
-//open url
-- (BOOL)application:(UIApplication*)application
-             openURL:(NSURL*)url
-   sourceApplication:(NSString*)sourceApplication
-         annotation:(id)annotation{
-    if(_eventSink!=nil){
-        NSMutableDictionary* dic = [[NSMutableDictionary alloc] init];
-        [dic setObject:url.absoluteURL forKey:@"url"];
-        _eventSink(dic);
-    }
-    return  true;
-}
-
-//open url
-- (BOOL)application:(UIApplication*)application
-continueUserActivity:(NSUserActivity*)userActivity
- restorationHandler:(void (^)(NSArray*))restorationHandler{
-    if(_eventSink!=nil){
-        NSMutableDictionary* dic = [[NSMutableDictionary alloc] init];
-        [dic setObject:userActivity.webpageURL.absoluteURL forKey:@"url"];
-        _eventSink(dic);
-    }
-    return  true;
 }
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
@@ -349,23 +314,6 @@ continueUserActivity:(NSUserActivity*)userActivity
         folderSize += [self fileSizeAtPath:fileAbsolutePath];
     }
     return folderSize;
-}
-
-#pragma mark - <FlutterStreamHandler>
-- (FlutterError* _Nullable)onListenWithArguments:(id _Nullable)arguments
-                                       eventSink:(FlutterEventSink)events {
-    _eventSink=events;
-    return nil;
-}
-
-
-- (FlutterError* _Nullable)onCancelWithArguments:(id _Nullable)arguments {
-    _eventSink=nil;
-    return nil;
-}
-
-- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-    
 }
 
 @end
