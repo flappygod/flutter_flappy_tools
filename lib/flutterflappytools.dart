@@ -23,6 +23,9 @@ class Flutterflappytools {
   //channel
   static const MethodChannel _channel = const MethodChannel('flutterflappytools');
 
+  //event channel
+  static final EventChannel eventChannel = const EventChannel('flutterflappytools_event');
+
   //path size
   static Future<String?> getPathSize(String path, PathSizeType type) async {
     int typeInt = 1;
