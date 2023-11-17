@@ -3,11 +3,6 @@
 #import <MapKit/MapKit.h>
 
 
-@interface FlutterflappytoolsPlugin ()<FlutterStreamHandler>
-@property(nonatomic,weak) FlutterEventChannel* eventChannel;
-@property(nonatomic,strong) FlutterEventSink eventSink;
-@end
-
 @implementation FlutterflappytoolsPlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
     
