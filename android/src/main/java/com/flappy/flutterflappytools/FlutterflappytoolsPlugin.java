@@ -26,6 +26,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 
 import java.io.File;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.util.List;
@@ -41,6 +42,8 @@ import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 
 import static android.content.Context.BATTERY_SERVICE;
+
+import org.json.JSONObject;
 
 /**
  * FlutterflappytoolsPlugin
@@ -278,6 +281,50 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
             Intent intent = new Intent(Intent.ACTION_VIEW, uri);
             activity.startActivity(intent);
             result.success("1");
+        }
+        //jump to scheme
+        else if (call.method.equals("jumpToIntent")) {
+            String url = call.argument("url");
+            Uri uri = Uri.parse(url);
+
+
+            try {
+                ///action view
+                Intent intentOne = new Intent(Intent.ACTION_VIEW, uri);
+                PackageManager packageManager = activity.getPackageManager();
+                if (intentOne.resolveActivity(packageManager) != null) {
+                    activity.startActivity(intentOne);
+                    result.success("{}");
+                    return;
+                }
+
+                ///action intent
+                Intent intentTwo = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
+                if (intentTwo.resolveActivity(activity.getPackageManager()) != null) {
+                    activity.startActivity(intentTwo);
+                    result.success("{}");
+                    return;
+                }
+                //try to find fallback url
+                String fallbackUrl = intentTwo.getStringExtra("browser_fallback_url");
+                if (fallbackUrl != null) {
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("browser_fallback_url", fallbackUrl);
+                    result.success(jsonObject.toString());
+                    return;
+                }
+                //invite to install
+                Intent marketIntent = new Intent(Intent.ACTION_VIEW).setData(
+                        Uri.parse("market://details?id=" + intentTwo.getPackage())
+                );
+                if (marketIntent.resolveActivity(packageManager) != null) {
+                    activity.startActivity(marketIntent);
+                    result.success("{}");
+                }
+                result.success("{}");
+            } catch (Exception e) {
+                result.success("{}");
+            }
         }
         //add cookie
         else if (call.method.equals("addManagerCookie")) {

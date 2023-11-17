@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/services.dart';
 import 'dart:async';
 import 'dart:io';
@@ -123,6 +125,12 @@ class Flutterflappytools {
     } else {
       return false;
     }
+  }
+
+  //jump to intent
+  static Future<Map> jumpToIntent(String url) async {
+    final String? ret = await _channel.invokeMethod('jumpToIntent', {"url": url});
+    return ret == null ? {} : jsonDecode(ret);
   }
 
   //go home
