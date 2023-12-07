@@ -1,9 +1,8 @@
 package com.flappy.flutterflappytools;
 
-import java.io.File;
 import java.io.FileInputStream;
-import java.security.MessageDigest;
 import java.text.DecimalFormat;
+import java.io.File;
 
 
 /****************************
@@ -49,12 +48,13 @@ public class FileSizeUtil {
     //get dic size
     private static long getFileSizes(File f) throws Exception {
         long size = 0;
-        File[] flist = f.listFiles();
-        for (int i = 0; i < flist.length; i++) {
-            if (flist[i].isDirectory()) {
-                size = size + getFileSizes(flist[i]);
+        File[] fList = f.listFiles();
+        assert fList != null;
+        for (File file : fList) {
+            if (file.isDirectory()) {
+                size = size + getFileSizes(file);
             } else {
-                size = size + getFileSize(flist[i]);
+                size = size + getFileSize(file);
             }
         }
         return size;
@@ -70,13 +70,13 @@ public class FileSizeUtil {
                 fileSizeLong = Double.parseDouble(df.format((double) fileS));
                 break;
             case SIZETYPE_KB:
-                fileSizeLong = Double.parseDouble(df.format((double) fileS / 1024));
+                fileSizeLong = Double.parseDouble(df.format((double) fileS / 1024.0));
                 break;
             case SIZETYPE_MB:
-                fileSizeLong = Double.parseDouble(df.format((double) fileS / 1048576));
+                fileSizeLong = Double.parseDouble(df.format((double) fileS / 1048576.0));
                 break;
             case SIZETYPE_GB:
-                fileSizeLong = Double.parseDouble(df.format((double) fileS / 1073741824));
+                fileSizeLong = Double.parseDouble(df.format((double) fileS / 1073741824.0));
                 break;
             default:
                 break;
@@ -85,43 +85,4 @@ public class FileSizeUtil {
     }
 
 
-    //get file md5
-    public static String getFileMD5(File file) {
-        if (!file.isFile()) {
-            return null;
-        }
-        MessageDigest digest = null;
-        FileInputStream in = null;
-        byte[] buffer = new byte[1024];
-        int len;
-        try {
-            digest = MessageDigest.getInstance("MD5");
-            in = new FileInputStream(file);
-            while ((len = in.read(buffer, 0, 1024)) != -1) {
-                digest.update(buffer, 0, len);
-            }
-            in.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-        return bytesToHexString(digest.digest());
-    }
-
-    //get bytes hex string
-    public static String bytesToHexString(byte[] src) {
-        StringBuilder stringBuilder = new StringBuilder("");
-        if (src == null || src.length <= 0) {
-            return null;
-        }
-        for (int i = 0; i < src.length; i++) {
-            int v = src[i] & 0xFF;
-            String hv = Integer.toHexString(v);
-            if (hv.length() < 2) {
-                stringBuilder.append(0);
-            }
-            stringBuilder.append(hv);
-        }
-        return stringBuilder.toString();
-    }
 }
