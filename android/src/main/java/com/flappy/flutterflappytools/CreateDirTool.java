@@ -1,27 +1,10 @@
 package com.flappy.flutterflappytools;
 
-import android.text.TextUtils;
-
 import java.io.File;
 
 
 public class CreateDirTool {
 
-    public static void createDir(String DIRPATH) throws Exception {
-        File file = new File(DIRPATH);
-        synchronized (CreateDirTool.class) {
-            if (!file.exists()) {
-                if (!file.mkdirs()) {
-                    Exception exception = new Exception("createDir failed, no dir or dirpath wrong");
-                    throw exception;
-                }
-            }
-        }
-        File nomidia = new File(DIRPATH + ".nomedia");
-        if (!nomidia.exists()) {
-            nomidia.createNewFile();
-        }
-    }
 
     public static boolean deleteFile(File file) {
         boolean flag = true;
@@ -30,8 +13,8 @@ public class CreateDirTool {
             if (childFiles == null || childFiles.length == 0) {
                 return true;
             }
-            for (int i = 0; i < childFiles.length; i++) {
-                boolean men = deleteFile(childFiles[i]);
+            for (File childFile : childFiles) {
+                boolean men = deleteFile(childFile);
                 if (!men) {
                     flag = false;
                 }
@@ -44,12 +27,4 @@ public class CreateDirTool {
         return flag;
     }
 
-
-    public static boolean isExitsSdcard() {
-        if (android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED)) {
-            return true;
-        } else {
-            return !TextUtils.isEmpty(android.os.Environment.getExternalStorageDirectory().getAbsolutePath());
-        }
-    }
 }
