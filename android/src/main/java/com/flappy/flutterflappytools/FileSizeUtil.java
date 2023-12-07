@@ -25,27 +25,12 @@ public class FileSizeUtil {
             } else {
                 blockSize = getFileSize(file);
             }
+            return formatFileSize(blockSize, sizeType);
         } catch (Exception e) {
-            e.printStackTrace();
+            return 0;
         }
-        return FormetFileSize(blockSize, sizeType);
     }
 
-    //get size auto
-    public static String getAutoFileOrFilesSize(String filePath) {
-        File file = new File(filePath);
-        long blockSize = 0;
-        try {
-            if (file.isDirectory()) {
-                blockSize = getFileSizes(file);
-            } else {
-                blockSize = getFileSize(file);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return FormetFileSize(blockSize);
-    }
 
     //get file size long
     private static long getFileSize(File file) throws Exception {
@@ -75,42 +60,23 @@ public class FileSizeUtil {
         return size;
     }
 
-    //format file size
-    private static String FormetFileSize(long fileS) {
-        DecimalFormat df = new DecimalFormat("#.00");
-        String fileSizeString = "";
-        String wrongSize = "0B";
-        if (fileS == 0) {
-            return wrongSize;
-        }
-        if (fileS < 1024) {
-            fileSizeString = df.format((double) fileS) + "B";
-        } else if (fileS < 1048576) {
-            fileSizeString = df.format((double) fileS / 1024) + "KB";
-        } else if (fileS < 1073741824) {
-            fileSizeString = df.format((double) fileS / 1048576) + "MB";
-        } else {
-            fileSizeString = df.format((double) fileS / 1073741824) + "GB";
-        }
-        return fileSizeString;
-    }
 
     //format file size by setting
-    private static double FormetFileSize(long fileS, int sizeType) {
+    private static double formatFileSize(long fileS, int sizeType) {
         DecimalFormat df = new DecimalFormat("#.00");
         double fileSizeLong = 0;
         switch (sizeType) {
             case SIZETYPE_B:
-                fileSizeLong = Double.valueOf(df.format((double) fileS));
+                fileSizeLong = Double.parseDouble(df.format((double) fileS));
                 break;
             case SIZETYPE_KB:
-                fileSizeLong = Double.valueOf(df.format((double) fileS / 1024));
+                fileSizeLong = Double.parseDouble(df.format((double) fileS / 1024));
                 break;
             case SIZETYPE_MB:
-                fileSizeLong = Double.valueOf(df.format((double) fileS / 1048576));
+                fileSizeLong = Double.parseDouble(df.format((double) fileS / 1048576));
                 break;
             case SIZETYPE_GB:
-                fileSizeLong = Double.valueOf(df.format((double) fileS / 1073741824));
+                fileSizeLong = Double.parseDouble(df.format((double) fileS / 1073741824));
                 break;
             default:
                 break;
