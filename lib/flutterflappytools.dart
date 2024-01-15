@@ -56,8 +56,9 @@ class Flutterflappytools {
   }
 
   //get device local
-  static Future<String> getDeviceLocal() async {
-    return await _channel.invokeMethod('getDeviceLocal', {});
+  static Future<String?> getDeviceLocal() async {
+    final String? local = await _channel.invokeMethod('getDeviceLocal', {});
+    return local;
   }
 
   //brightness
