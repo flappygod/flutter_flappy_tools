@@ -52,6 +52,18 @@
         CGFloat brightness=[UIScreen mainScreen].brightness;
         result([NSString stringWithFormat:@"%.2f",brightness]);
     }
+    //get device current locale
+    else  if([@"getDeviceLocal" isEqualToString:call.method]){
+        NSString *locale = [[NSLocale currentLocale] objectForKey: NSLocaleCountryCode];
+        NSString *language = [[NSLocale currentLocale] objectForKey: NSLocaleLanguageCode];
+        if(locale == nil) {
+            NSString *formattedStr = [NSString stringWithFormat:@"%@",language];
+            result(formattedStr);
+        } else {
+            NSString *formattedStr = [NSString stringWithFormat:@"%@-%@",language, locale];
+            result(formattedStr);
+        };
+    }
     //setBrightness
     else if([@"setBrightness" isEqualToString:call.method]){
         NSString* brightness=(NSString*)call.arguments[@"brightness"];
