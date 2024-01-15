@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Build;
@@ -183,6 +184,14 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
             String str = df.format(brightLess);
             //success
             result.success(str);
+        } else if (call.method.equals("getDeviceLocal")) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && !Resources.getSystem().getConfiguration().getLocales().isEmpty()) {
+                String local = getLocaleTag(Resources.getSystem().getConfiguration().getLocales().get(0));
+                result.success(local);
+            } else {
+                String local = getLocaleTag(Resources.getSystem().getConfiguration().locale);
+                result.success(local);
+            }
         }
         //set Brightness
         else if (call.method.equals("setBrightness")) {
@@ -425,6 +434,14 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
                 }
             }
             return false;
+        }
+    }
+
+    private String getLocaleTag(Locale locale) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            return locale.toLanguageTag();
+        } else {
+            return locale.toString();
         }
     }
 

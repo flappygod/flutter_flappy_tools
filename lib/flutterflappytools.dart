@@ -55,6 +55,11 @@ class Flutterflappytools {
     return double.parse(brightness ?? "0");
   }
 
+  //get device local
+  static Future<String> getDeviceLocal() async {
+    return await _channel.invokeMethod('getDeviceLocal', {});
+  }
+
   //brightness
   static Future<String?> setBrightness(double brightness) async {
     final String? set = await _channel.invokeMethod('setBrightness', {"brightness": brightness.toStringAsFixed(2)});
