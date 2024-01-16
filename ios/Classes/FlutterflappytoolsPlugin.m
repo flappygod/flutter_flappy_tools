@@ -54,15 +54,14 @@
     }
     //get device current locale
     else  if([@"getDeviceLocal" isEqualToString:call.method]){
-        NSString *locale = [[NSLocale currentLocale] objectForKey: NSLocaleCountryCode];
-        NSString *language = [[NSLocale currentLocale] objectForKey: NSLocaleLanguageCode];
-        if(locale == nil) {
-            NSString *formattedStr = [NSString stringWithFormat:@"%@",language];
-            result(formattedStr);
-        } else {
-            NSString *formattedStr = [NSString stringWithFormat:@"%@-%@",language, locale];
-            result(formattedStr);
-        };
+        UIDevice* currentDevice = [UIDevice currentDevice];
+        NSArray*  languageArray = [NSLocale preferredLanguages];
+        if(languageArray.count==0){
+            result(@"en-US");
+            return;
+        }
+        NSString* language = [languageArray objectAtIndex:0];
+        result(language);
     }
     //setBrightness
     else if([@"setBrightness" isEqualToString:call.method]){
@@ -134,9 +133,9 @@
         };
         activityVC.completionWithItemsHandler = myBlock;
         UIViewController *topController = [self _topViewController:[[UIApplication sharedApplication].keyWindow rootViewController]];
-        
+
         [topController presentViewController:activityVC animated:YES completion:nil];
-        
+
         result(@"true");
     }
     else if([@"jumpToUrl" isEqualToString:call.method]){
@@ -206,14 +205,21 @@
         else if(type==1){
             // check amap
             if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"iosamap://"]]) {
-                
+
                 NSString *urlString = [[NSString stringWithFormat:@"iosamap://navi?sourceApplication=%@&poiname=%@&backScheme=%@&lat=%f&lon=%f&dev=0&style=2",
                                         @"Navigation",
                                         title,
                                         @"",
                                         [lat floatValue],
-                                        [lng floatValue]] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-                [[UIApplication sharedApplication] openURL:[NSURL URLWithString:urlString]];
+                                        [lng floatValue]] stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
+                if (@available(iOS 10.0, *)) {
+                    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:urlString] options:@{} completionHandler:nil];
+                }else{
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+                    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:urlString]];
+#pragma clang diagnostic pop
+                }
                 result(@"1");
             }else{
                 result(@"0");
@@ -223,10 +229,16 @@
         else if(type==2){
             // check baidumap
             if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"baidumap://"]]) {
-                
-                NSString *urlString = [[NSString stringWithFormat:@"baidumap://map/direction?origin={{Location}}&destination=latlng:%f,%f|name=%@&mode=driving&coord_type=gcj02",[lat floatValue],[lng floatValue],title] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-                [[UIApplication sharedApplication] openURL:[NSURL URLWithString:urlString]];
-                
+
+                NSString *urlString = [[NSString stringWithFormat:@"baidumap://map/direction?origin={{Location}}&destination=latlng:%f,%f|name=%@&mode=driving&coord_type=gcj02",[lat floatValue],[lng floatValue],title] stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
+                if (@available(iOS 10.0, *)) {
+                    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:urlString] options:@{} completionHandler:nil];
+                }else{
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+                    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:urlString]];
+#pragma clang diagnostic pop
+                }
                 result(@"1");
             }else{
                 result(@"0");
@@ -238,8 +250,15 @@
             if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"qqmap://"]]) {
                 NSString *urlString = [[NSString stringWithFormat:@"qqmap://map/routeplan?type=drive&fromcoord=CurrentLocation&tocoord=%@,%@&referer=IXHBZ-QIZE4-ZQ6UP-DJYEO-HC2K2-EZBXJ",
                                         lat,
-                                        lng] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-                [[UIApplication sharedApplication] openURL:[NSURL URLWithString:urlString]];
+                                        lng] stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
+                if (@available(iOS 10.0, *)) {
+                    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:urlString] options:@{} completionHandler:nil];
+                }else{
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+                    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:urlString]];
+#pragma clang diagnostic pop
+                }
                 result(@"1");
             }else{
                 result(@"0");
@@ -260,14 +279,16 @@
     NSString* encodedString =  [scheme stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
     UIApplication *application = [UIApplication sharedApplication];
     NSURL *URL = [NSURL URLWithString:encodedString];
-    if ([application respondsToSelector:@selector(openURL:options:completionHandler:)]) {
+    if (@available(iOS 10.0, *)) {
         [application openURL:URL options:@{}
            completionHandler:^(BOOL success) {
             NSLog(@"Open %@: %d",scheme,success);
         }];
     } else {
-        BOOL success = [application openURL:URL];
-        NSLog(@"Open %@: %d",scheme,success);
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        [application openURL:URL];
+#pragma clang diagnostic pop
     }
 }
 
