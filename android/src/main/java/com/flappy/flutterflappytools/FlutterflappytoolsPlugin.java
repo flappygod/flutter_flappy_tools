@@ -209,7 +209,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
                 result.success(local);
             }
         } else if (call.method.equals("checkPermission")) {
-            int type = call.argument("type");
+            int type = Integer.parseInt((String) Objects.requireNonNull(call.argument("type")));
             switch (type) {
                 case 0:
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
