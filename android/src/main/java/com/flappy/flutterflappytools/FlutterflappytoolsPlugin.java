@@ -53,7 +53,7 @@ import org.json.JSONObject;
 /**
  * FlutterflappytoolsPlugin
  */
-public class FlutterFlappyToolsPlugin implements FlutterPlugin, MethodCallHandler, ActivityAware, PluginRegistry.RequestPermissionsResultListener {
+public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandler, ActivityAware, PluginRegistry.RequestPermissionsResultListener {
 
     private final int RequestPermissionCode = 1;
 
@@ -137,7 +137,7 @@ public class FlutterFlappyToolsPlugin implements FlutterPlugin, MethodCallHandle
     // in the same class.
     public static void registerWith(Registrar registrar) {
         final MethodChannel channel = new MethodChannel(registrar.messenger(), "flutterflappytools");
-        FlutterFlappyToolsPlugin plugin = new FlutterFlappyToolsPlugin();
+        FlutterflappytoolsPlugin plugin = new FlutterflappytoolsPlugin();
         plugin.context = registrar.activity();
         plugin.activity = registrar.activity();
         plugin.channel = channel;
