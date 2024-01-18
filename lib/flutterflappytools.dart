@@ -1,6 +1,5 @@
-import 'dart:convert';
-
 import 'package:flutter/services.dart';
+import 'dart:convert';
 import 'dart:async';
 import 'dart:io';
 
@@ -12,16 +11,72 @@ enum PathSizeType {
   TYPE_GB,
 }
 
-//starus bar
+//status bar
 enum StatusBarType {
   WHITE,
   BLACK,
 }
 
+//map type
+enum MapType {
+  //apple
+  MapApple,
+  //a map
+  MapAMap,
+  //baidu
+  MapBaidu,
+  //tencent
+  MapTencent,
+}
+
+//permission type
+enum PermissionType {
+  notification,
+  camera,
+  photo,
+}
+
 //tools
-class Flutterflappytools {
+class FlutterFlappyTools {
   //channel
   static const MethodChannel _channel = const MethodChannel('flutterflappytools');
+
+  //get map type
+  static String _getMapType(MapType type) {
+    int mapType = 0;
+    switch (type) {
+      case MapType.MapApple:
+        mapType = 0;
+        break;
+      case MapType.MapAMap:
+        mapType = 1;
+        break;
+      case MapType.MapBaidu:
+        mapType = 2;
+        break;
+      case MapType.MapTencent:
+        mapType = 3;
+        break;
+    }
+    return mapType.toString();
+  }
+
+  //get permission type
+  static String _getPermissionType(PermissionType type) {
+    int permissionType = 0;
+    switch (type) {
+      case PermissionType.notification:
+        permissionType = 0;
+        break;
+      case PermissionType.camera:
+        permissionType = 1;
+        break;
+      case PermissionType.photo:
+        permissionType = 2;
+        break;
+    }
+    return permissionType.toString();
+  }
 
   //path size
   static Future<String?> getPathSize(String path, PathSizeType type) async {
@@ -55,16 +110,26 @@ class Flutterflappytools {
     return double.parse(brightness ?? "0");
   }
 
-  //get device local
-  static Future<String?> getDeviceLocal() async {
-    final String? local = await _channel.invokeMethod('getDeviceLocal', {});
-    return local;
-  }
-
   //brightness
   static Future<String?> setBrightness(double brightness) async {
     final String? set = await _channel.invokeMethod('setBrightness', {"brightness": brightness.toStringAsFixed(2)});
     return set;
+  }
+
+  //stay light
+  static Future<bool> setScreenSteadyLight(bool state) async {
+    final String? ret = await _channel.invokeMethod('setScreenSteadyLight', {"state": (state ? "1" : "0")});
+    if (ret == "1") {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  //get device local
+  static Future<String?> getDeviceLocal() async {
+    final String? local = await _channel.invokeMethod('getDeviceLocal', {});
+    return local;
   }
 
   //battery level
@@ -76,16 +141,6 @@ class Flutterflappytools {
   //charge
   static Future<bool> getBatteryCharge() async {
     final String? ret = await _channel.invokeMethod('getBatteryCharge', {});
-    if (ret == "1") {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  //stay light
-  static Future<bool> setScreenSteadyLight(bool state) async {
-    final String? ret = await _channel.invokeMethod('setScreenSteadyLight', {"state": (state ? "1" : "0")});
     if (ret == "1") {
       return true;
     } else {
@@ -123,7 +178,7 @@ class Flutterflappytools {
     }
   }
 
-  //jumpto scheme
+  //jump to scheme
   static Future<bool> jumpToScheme(String url) async {
     final String? ret = await _channel.invokeMethod('jumpToScheme', {"url": url});
     if (ret == "1") {
@@ -178,33 +233,15 @@ class Flutterflappytools {
     }
   }
 
-  static String _getMapType(MapType type) {
-    int mapType = 0;
-    switch (type) {
-      case MapType.MapApple:
-        mapType = 0;
-        break;
-      case MapType.MapAmap:
-        mapType = 1;
-        break;
-      case MapType.MapBaidu:
-        mapType = 2;
-        break;
-      case MapType.MapTencent:
-        mapType = 3;
-        break;
+  //check  permission
+  static Future<bool> checkPermission(PermissionType permissionType) async {
+    final String? ret = await _channel.invokeMethod('checkPermission', {
+      "type": _getPermissionType(permissionType),
+    });
+    if (ret == "1") {
+      return true;
+    } else {
+      return false;
     }
-    return mapType.toString();
   }
-}
-
-enum MapType {
-  //apple
-  MapApple,
-  //amap
-  MapAmap,
-  //baidu
-  MapBaidu,
-  //tencent
-  MapTencent,
 }

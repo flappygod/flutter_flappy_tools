@@ -1,5 +1,6 @@
 package com.flappy.flutterflappytools;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.Service;
 import android.content.ContentResolver;
@@ -15,6 +16,7 @@ import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -25,13 +27,14 @@ import android.webkit.CookieSyncManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import java.io.File;
-import java.net.URISyntaxException;
-import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
@@ -40,6 +43,7 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
+import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 
 import static android.content.Context.BATTERY_SERVICE;
@@ -49,8 +53,9 @@ import org.json.JSONObject;
 /**
  * FlutterflappytoolsPlugin
  */
-public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandler, ActivityAware {
+public class FlutterFlappyToolsPlugin implements FlutterPlugin, MethodCallHandler, ActivityAware, PluginRegistry.RequestPermissionsResultListener {
 
+    private final int RequestPermissionCode = 1;
 
     //context
     private Context context;
@@ -61,6 +66,9 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
     //binding
     private ActivityPluginBinding activityPluginBinding;
 
+    //permission listener
+    private PermissionListener permissionListener;
+
     //channel
     private MethodChannel channel;
 
@@ -69,9 +77,9 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
+        this.context = flutterPluginBinding.getApplicationContext();
         channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "flutterflappytools");
         channel.setMethodCallHandler(this);
-        this.context = flutterPluginBinding.getApplicationContext();
     }
 
     @Override
@@ -102,11 +110,18 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
     }
 
     private void addBinding(ActivityPluginBinding binding) {
+        if (activityPluginBinding != null) {
+            activityPluginBinding.removeRequestPermissionsResultListener(this);
+        }
         activity = binding.getActivity();
         activityPluginBinding = binding;
+        activityPluginBinding.addRequestPermissionsResultListener(this);
     }
 
     private void removeBinding() {
+        if (activityPluginBinding != null) {
+            activityPluginBinding.removeRequestPermissionsResultListener(this);
+        }
         activity = null;
         activityPluginBinding = null;
     }
@@ -122,7 +137,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
     // in the same class.
     public static void registerWith(Registrar registrar) {
         final MethodChannel channel = new MethodChannel(registrar.messenger(), "flutterflappytools");
-        FlutterflappytoolsPlugin plugin = new FlutterflappytoolsPlugin();
+        FlutterFlappyToolsPlugin plugin = new FlutterFlappyToolsPlugin();
         plugin.context = registrar.activity();
         plugin.activity = registrar.activity();
         plugin.channel = channel;
@@ -140,7 +155,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
 
         //get path size
         if (call.method.equals("getPathSize")) {
-            final Handler handler = new Handler() {
+            final Handler handler = new Handler(Looper.getMainLooper()) {
                 public void handleMessage(Message message) {
                     result.success(String.valueOf(message.obj));
                 }
@@ -158,14 +173,15 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
         }
         //clear path
         else if (call.method.equals("clearPath")) {
-            final Handler handler = new Handler() {
-                public void handleMessage(Message message) {
+            final Handler handler = new Handler(Looper.getMainLooper()) {
+                public void handleMessage(@NonNull Message message) {
                     result.success("1");
                 }
             };
             new Thread() {
                 public void run() {
                     final String path = call.argument("path");
+                    assert path != null;
                     CreateDirTool.deleteFile(new File(path));
                     Message msg = handler.obtainMessage(1);
                     handler.sendMessage(msg);
@@ -192,12 +208,56 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
                 String local = getLocaleTag(Resources.getSystem().getConfiguration().locale);
                 result.success(local);
             }
+        } else if (call.method.equals("checkPermission")) {
+            int type = call.argument("type");
+            switch (type) {
+                case 0:
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        checkPermission(Manifest.permission.ACCESS_NOTIFICATION_POLICY, new PermissionListener() {
+                            @Override
+                            public void result(boolean flag) {
+                                if (flag) {
+                                    result.success("1");
+                                } else {
+                                    result.success("0");
+                                }
+                            }
+                        });
+                    }
+                    break;
+                case 1:
+                    checkPermission(Manifest.permission.CAMERA, new PermissionListener() {
+                        @Override
+                        public void result(boolean flag) {
+                            if (flag) {
+                                result.success("1");
+                            } else {
+                                result.success("0");
+                            }
+                        }
+                    });
+                    break;
+                case 2:
+                    checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, new PermissionListener() {
+                        @Override
+                        public void result(boolean flag) {
+                            if (flag) {
+                                result.success("1");
+                            } else {
+                                result.success("0");
+                            }
+                        }
+                    });
+                    break;
+            }
+
         }
         //set Brightness
         else if (call.method.equals("setBrightness")) {
             //brightness
             String brightness = call.argument("brightness");
             //parse double
+            assert brightness != null;
             double fla = Double.parseDouble(brightness);
             //change bright ness
             changeAppBrightness(activity, (int) (255 * fla));
@@ -214,6 +274,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
             } else {
                 Intent intent = new ContextWrapper(context.getApplicationContext()).registerReceiver(null,
                         new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+                assert intent != null;
                 level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL,
                         -1) / intent.getIntExtra(BatteryManager.EXTRA_SCALE,
                         -1);
@@ -224,6 +285,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
         else if (call.method.equals("getBatteryCharge")) {
             Intent intent = new ContextWrapper(context.getApplicationContext()).
                     registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+            assert intent != null;
             int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
             if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
                 result.success("1");
@@ -234,6 +296,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
         //setScreenSteadyLight
         else if (call.method.equals("setScreenSteadyLight")) {
             String state = call.argument("state");
+            assert state != null;
             if (state.equals("1")) {
                 activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             } else {
@@ -264,7 +327,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
             String url = call.argument("url");
             //start activity
             try {
-                if (isInstalledApp(context, "com.android.browser")) {
+                if (checkApkExist(context, "com.android.browser")) {
                     Uri uri = Uri.parse(url);
                     Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                     intent.setClassName("com.android.browser", "com.android.browser.BrowserActivity");
@@ -295,8 +358,6 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
         else if (call.method.equals("jumpToIntent")) {
             String url = call.argument("url");
             Uri uri = Uri.parse(url);
-
-
             try {
                 ///action view
                 Intent intentOne = new Intent(Intent.ACTION_VIEW, uri);
@@ -314,6 +375,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
                     result.success("{}");
                     return;
                 }
+
                 //try to find fallback url
                 String fallbackUrl = intentTwo.getStringExtra("browser_fallback_url");
                 if (fallbackUrl != null) {
@@ -322,10 +384,13 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
                     result.success(jsonObject.toString());
                     return;
                 }
+
                 //invite to install
                 Intent marketIntent = new Intent(Intent.ACTION_VIEW).setData(
                         Uri.parse("market://details?id=" + intentTwo.getPackage())
                 );
+
+                ///success
                 if (marketIntent.resolveActivity(packageManager) != null) {
                     activity.startActivity(marketIntent);
                     result.success("{}");
@@ -351,7 +416,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
         }
         //check map install
         else if (call.method.equals("isMapInstalled")) {
-            int type = Integer.parseInt((String) call.argument("type"));
+            int type = Integer.parseInt((String) Objects.requireNonNull(call.argument("type")));
             if (type == 0) {
                 result.success("0");
             } else if (type == 1) {
@@ -381,7 +446,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
             String lat = call.argument("lat");
             String lng = call.argument("lng");
             String title = call.argument("title");
-            int type = Integer.parseInt((String) call.argument("type"));
+            int type = Integer.parseInt((String) Objects.requireNonNull(call.argument("type")));
             if (type == 0) {
                 result.success("0");
             } else if (type == 1) {
@@ -413,29 +478,25 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
         }
     }
 
-    //check install
-    public static boolean isInstalledApp(Context context, String packageName) {
+
+    //check exist
+    private boolean checkApkExist(Context context, String packageName) {
         try {
-            ApplicationInfo info = context.getPackageManager().getApplicationInfo(packageName, PackageManager.GET_UNINSTALLED_PACKAGES);
-            if (info != null) {
-                return true;
-            } else {
-                return false;
-            }
+            context.getPackageManager().getApplicationInfo(packageName, PackageManager.GET_UNINSTALLED_PACKAGES);
+            return true;
         } catch (PackageManager.NameNotFoundException e) {
             final PackageManager packageManager = context.getPackageManager();
-            List<PackageInfo> pinfo = packageManager.getInstalledPackages(0);
-            if (pinfo != null) {
-                for (int i = 0; i < pinfo.size(); i++) {
-                    String pn = pinfo.get(i).packageName.toLowerCase(Locale.ENGLISH);
-                    if (pn.equals(packageName)) {
-                        return true;
-                    }
+            List<PackageInfo> info = packageManager.getInstalledPackages(0);
+            for (int i = 0; i < info.size(); i++) {
+                String pn = info.get(i).packageName.toLowerCase(Locale.ENGLISH);
+                if (pn.equals(packageName)) {
+                    return true;
                 }
             }
             return false;
         }
     }
+
 
     private String getLocaleTag(Locale locale) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -446,7 +507,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
     }
 
 
-    //baidumap
+    //baidu map
     private static void invokeBaiDuMap(Context context, String lat, String lng, String title) {
 
         try {
@@ -468,14 +529,14 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
     //amap
     private static void invokeAuToNaveMap(Context context, String lat, String lng, String title) {
         try {
-            StringBuffer stringBuffer = new StringBuffer("androidamap://navi?sourceApplication=")
-                    .append("Location");
-            stringBuffer.append("&poiname=").append(title);
-            stringBuffer.append("&lat=").append(lat)
-                    .append("&lon=").append(lng)
-                    .append("&dev=").append("0")
-                    .append("&style=").append("2");
-            Intent intent = new Intent("android.intent.action.VIEW", android.net.Uri.parse(stringBuffer.toString()));
+            String stringBuffer = "androidamap://navi?sourceApplication=" +
+                    "Location" +
+                    "&poiname=" + title +
+                    "&lat=" + lat +
+                    "&lon=" + lng +
+                    "&dev=" + "0" +
+                    "&style=" + "2";
+            Intent intent = new Intent("android.intent.action.VIEW", android.net.Uri.parse(stringBuffer));
             intent.setPackage("com.autonavi.minimap");
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
@@ -502,20 +563,6 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
     }
 
 
-    //check exist
-    private boolean checkApkExist(Context context, String packageName) {
-        try {
-            ApplicationInfo info = context.getPackageManager().getApplicationInfo(packageName, PackageManager.GET_UNINSTALLED_PACKAGES);
-            if (info != null) {
-                return true;
-            } else {
-                return false;
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            return false;
-        }
-    }
-
     //change brightness
     public void changeAppBrightness(Activity activity, int brightness) {
         if (activity == null) {
@@ -538,8 +585,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
         }
         try {
             ContentResolver cr = activity.getContentResolver();
-            int value = Settings.System.getInt(cr, Settings.System.SCREEN_BRIGHTNESS);
-            return value;
+            return Settings.System.getInt(cr, Settings.System.SCREEN_BRIGHTNESS);
         } catch (Settings.SettingNotFoundException e) {
             return 0;
         }
@@ -553,7 +599,6 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
         cookieManager.setCookie(url, cookie);
         cookieManager.setCookie(url, "Domain=" + url);
         cookieManager.setCookie(url, "Path=/");
-        String cookies = cookieManager.getCookie(url);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             cookieManager.flush();
         } else {
@@ -577,4 +622,38 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
         }
     }
 
+    private void checkPermission(String permission, PermissionListener listener) {
+        int hasPermission = ContextCompat.checkSelfPermission(context, permission);
+        if (hasPermission == PackageManager.PERMISSION_GRANTED) {
+            listener.result(true);
+        } else {
+            permissionListener = listener;
+            ActivityCompat.requestPermissions(
+                    activity,
+                    new String[]{permission},
+                    RequestPermissionCode
+            );
+        }
+    }
+
+
+    @Override
+    public boolean onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == RequestPermissionCode) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                //success
+                if (permissionListener != null) {
+                    permissionListener.result(true);
+                    permissionListener = null;
+                }
+            } else {
+                //failure
+                if (permissionListener != null) {
+                    permissionListener.result(false);
+                    permissionListener = null;
+                }
+            }
+        }
+        return false;
+    }
 }

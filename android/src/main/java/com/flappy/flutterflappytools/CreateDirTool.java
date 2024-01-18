@@ -6,6 +6,7 @@ import java.io.File;
 public class CreateDirTool {
 
 
+    ///delete file
     public static boolean deleteFile(File file) {
         boolean flag = true;
         if (file.isDirectory()) {

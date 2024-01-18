@@ -9,10 +9,10 @@ import java.io.File;
  * version  1.0.0
  */
 public class FileSizeUtil {
-    public static final int SIZETYPE_B = 1;
-    public static final int SIZETYPE_KB = 2;
-    public static final int SIZETYPE_MB = 3;
-    public static final int SIZETYPE_GB = 4;
+    public static final int SIZE_TYPE_B = 1;
+    public static final int SIZE_TYPE_KB = 2;
+    public static final int SIZE_TYPE_MB = 3;
+    public static final int SIZE_TYPE_GB = 4;
 
     //get size
     public static double getFileOrFilesSize(String filePath, int sizeType) {
@@ -66,16 +66,16 @@ public class FileSizeUtil {
         DecimalFormat df = new DecimalFormat("#.00");
         double fileSizeLong = 0;
         switch (sizeType) {
-            case SIZETYPE_B:
+            case SIZE_TYPE_B:
                 fileSizeLong = Double.parseDouble(df.format((double) fileS));
                 break;
-            case SIZETYPE_KB:
+            case SIZE_TYPE_KB:
                 fileSizeLong = Double.parseDouble(df.format((double) fileS / 1024.0));
                 break;
-            case SIZETYPE_MB:
+            case SIZE_TYPE_MB:
                 fileSizeLong = Double.parseDouble(df.format((double) fileS / 1048576.0));
                 break;
-            case SIZETYPE_GB:
+            case SIZE_TYPE_GB:
                 fileSizeLong = Double.parseDouble(df.format((double) fileS / 1073741824.0));
                 break;
             default:

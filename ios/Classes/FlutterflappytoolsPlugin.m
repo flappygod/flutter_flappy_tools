@@ -1,6 +1,10 @@
 #import "FlutterflappytoolsPlugin.h"
 #import "AudioToolbox/AudioToolbox.h"
+#import <UserNotifications/UserNotifications.h>
+#import <AVFoundation/AVFoundation.h>
 #import <MapKit/MapKit.h>
+#import <Photos/Photos.h>
+
 
 
 @implementation FlutterflappytoolsPlugin
@@ -84,6 +88,53 @@
             result(@"0");
         }
     }
+    //getBatteryCharge
+    else if([@"checkPermission" isEqualToString:call.method]){
+        NSInteger type=((NSString*)call.arguments[@"type"]).intValue;
+        if(type==0){
+            [[UNUserNotificationCenter currentNotificationCenter]
+             requestAuthorizationWithOptions:(UNAuthorizationOptionAlert + UNAuthorizationOptionSound + UNAuthorizationOptionBadge)
+             completionHandler:^(BOOL granted, NSError * _Nullable error) {
+                if(granted){
+                    result(@"1");
+                } else {
+                    result(@"0");
+                }
+            }];
+            return;
+        }
+        if(type==1){
+            [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
+                if(granted){
+                    result(@"1");
+                } else {
+                    result(@"0");
+                }
+            }];
+            return;
+        }
+        if(type==2){
+            [PHPhotoLibrary requestAuthorization:^(PHAuthorizationStatus status) {
+                switch (status) {
+                    case PHAuthorizationStatusLimited:
+                    case PHAuthorizationStatusAuthorized:
+                        result(@"1");
+                        break;
+                    case PHAuthorizationStatusDenied:
+                        result(@"0");
+                        break;
+                    case PHAuthorizationStatusNotDetermined:
+                        result(@"0");
+                        break;
+                    case PHAuthorizationStatusRestricted:
+                        result(@"0");
+                        break;
+                }
+            }];
+            return;
+        }
+        
+    }
     //setSceenSteadyLight
     else if([@"setScreenSteadyLight" isEqualToString:call.method]){
         NSString* state=(NSString*)call.arguments[@"state"];
@@ -133,9 +184,9 @@
         };
         activityVC.completionWithItemsHandler = myBlock;
         UIViewController *topController = [self _topViewController:[[UIApplication sharedApplication].keyWindow rootViewController]];
-
+        
         [topController presentViewController:activityVC animated:YES completion:nil];
-
+        
         result(@"true");
     }
     else if([@"jumpToUrl" isEqualToString:call.method]){
@@ -205,7 +256,7 @@
         else if(type==1){
             // check amap
             if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"iosamap://"]]) {
-
+                
                 NSString *urlString = [[NSString stringWithFormat:@"iosamap://navi?sourceApplication=%@&poiname=%@&backScheme=%@&lat=%f&lon=%f&dev=0&style=2",
                                         @"Navigation",
                                         title,
@@ -229,7 +280,7 @@
         else if(type==2){
             // check baidumap
             if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"baidumap://"]]) {
-
+                
                 NSString *urlString = [[NSString stringWithFormat:@"baidumap://map/direction?origin={{Location}}&destination=latlng:%f,%f|name=%@&mode=driving&coord_type=gcj02",[lat floatValue],[lng floatValue],title] stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
                 if (@available(iOS 10.0, *)) {
                     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:urlString] options:@{} completionHandler:nil];
