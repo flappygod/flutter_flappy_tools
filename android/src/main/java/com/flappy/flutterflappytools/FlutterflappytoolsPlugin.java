@@ -244,7 +244,7 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodCallHandle
                             if (flag) {
                                 result.success("1");
                             } else {
-                                result.success("0");
+                                result.success("1");
                             }
                         }
                     });
