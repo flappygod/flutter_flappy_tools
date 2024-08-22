@@ -31,6 +31,7 @@ import androidx.core.content.ContextCompat;
 
 import java.io.File;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -243,22 +244,26 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodChannel.Me
      * Handles the checkPermission method call.
      */
     private void handleCheckPermission(MethodCall call, MethodChannel.Result result) {
-        int type = Integer.parseInt((String) Objects.requireNonNull(call.argument("type")));
-        String permission = null;
+        int type = Integer.parseInt(Objects.requireNonNull(call.argument("type")));
+        List<String> permission = new ArrayList<>();
         switch (type) {
             case 0:
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    permission = Manifest.permission.ACCESS_NOTIFICATION_POLICY;
+                    permission.add(Manifest.permission.ACCESS_NOTIFICATION_POLICY);
                 }
                 break;
             case 1:
-                permission = Manifest.permission.CAMERA;
+                permission.add(Manifest.permission.CAMERA);
                 break;
             case 2:
-                permission = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+                permission.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                break;
+            case 3:
+                permission.add(Manifest.permission.WRITE_CALENDAR);
+                permission.add(Manifest.permission.READ_CALENDAR);
                 break;
         }
-        if (permission != null) {
+        if (!permission.isEmpty()) {
             checkPermission(permission, flag -> result.success(flag ? "1" : "0"));
         }
     }
@@ -628,16 +633,21 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodChannel.Me
     /**
      * Checks if the specified permission is granted. If not, requests the permission.
      *
-     * @param permission The permission to check.
-     * @param listener   The listener to notify the result.
+     * @param permissions The permission to check.
+     * @param listener    The listener to notify the result.
      */
-    private void checkPermission(String permission, PermissionListener listener) {
-        int hasPermission = ContextCompat.checkSelfPermission(context, permission);
-        if (hasPermission == PackageManager.PERMISSION_GRANTED) {
+    private void checkPermission(List<String> permissions, PermissionListener listener) {
+        List<String> permissionsToRequest = new ArrayList<>();
+        for (String permission : permissions) {
+            if (ContextCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+                permissionsToRequest.add(permission);
+            }
+        }
+        if (permissionsToRequest.isEmpty()) {
             listener.result(true);
         } else {
             permissionListener = listener;
-            ActivityCompat.requestPermissions(activity, new String[]{permission}, REQUEST_PERMISSION_CODE);
+            ActivityCompat.requestPermissions(activity, permissionsToRequest.toArray(new String[0]), REQUEST_PERMISSION_CODE);
         }
     }
 

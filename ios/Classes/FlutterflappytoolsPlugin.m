@@ -2,6 +2,7 @@
 #import "AudioToolbox/AudioToolbox.h"
 #import <UserNotifications/UserNotifications.h>
 #import <AVFoundation/AVFoundation.h>
+#import <EventKit/EventKit.h>
 #import <MapKit/MapKit.h>
 #import <Photos/Photos.h>
 
@@ -131,6 +132,23 @@
                         break;
                 }
             }];
+            return;
+        }
+        if(type==3){
+            EKEventStore *eventStore = [[EKEventStore alloc] init];
+            if ([EKEventStore authorizationStatusForEntityType:EKEntityTypeEvent] == EKAuthorizationStatusNotDetermined) {
+                [eventStore requestAccessToEntityType:EKEntityTypeEvent completion:^(BOOL granted, NSError * _Nullable error) {
+                    if (granted) {
+                        result(@"1");
+                    } else {
+                        result(@"0");
+                    }
+                }];
+            } else if ([EKEventStore authorizationStatusForEntityType:EKEntityTypeEvent] == EKAuthorizationStatusAuthorized) {
+                result(@"1");
+            } else {
+                result(@"0");
+            }
             return;
         }
         

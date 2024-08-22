@@ -34,6 +34,7 @@ enum PermissionType {
   notification,
   camera,
   photo,
+  calendar,
 }
 
 //tools
@@ -73,6 +74,9 @@ class FlutterFlappyTools {
         break;
       case PermissionType.photo:
         permissionType = 2;
+        break;
+      case PermissionType.calendar:
+        permissionType = 3;
         break;
     }
     return permissionType.toString();
