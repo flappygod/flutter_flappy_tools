@@ -419,8 +419,12 @@ public class FlutterflappytoolsPlugin implements FlutterPlugin, MethodChannel.Me
         String url = call.argument("url");
         String cookie = call.argument("cookie");
         new Thread(() -> {
-            addCookie(url, cookie);
-            new Handler(Looper.getMainLooper()).post(() -> result.success("1"));
+            try{
+                addCookie(url, cookie);
+                new Handler(Looper.getMainLooper()).post(() -> result.success("1"));
+            }catch (Exception ex){
+                new Handler(Looper.getMainLooper()).post(() -> result.success("0"));
+            }
         }).start();
     }
 
