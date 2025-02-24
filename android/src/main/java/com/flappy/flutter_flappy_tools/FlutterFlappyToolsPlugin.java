@@ -110,6 +110,7 @@ public class FlutterFlappyToolsPlugin implements FlutterPlugin, MethodCallHandle
      */
     @Override
     public void onDetachedFromActivityForConfigChanges() {
+        removeBinding();
     }
 
     /**
